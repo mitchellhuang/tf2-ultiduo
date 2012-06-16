@@ -1,12 +1,15 @@
 h2 Select your class
 p player
 
-p a(href="/play_1")Play Soldier
-p a(href="/play_2")Play Medic
-p a(href="/play_0")Remove from tournament
+p
+	a(href='/play_1') Play Soldier
+p 
+	a(href='/play_2') Play Medic
+p 
+	a(href='/play_0') Remove from tournament
 
 p= !class_id? "No class selected" : (class_id === 2? "Medic":"Soldier")
 if class_id !== 0
   img(src= "images/"+(class_id === 2? "medic":"solly")+".png")
 
-a(href="/logout")Logout
+p a(href='/logout') Logout
