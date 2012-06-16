@@ -69,6 +69,7 @@ app.get('/signup', function(req, res) {
     console.log(req.session.player + " is class " + req.session.class_id);
     res.render('vote', {
       player: req.session.player,
+      steamid: req.session.steamid,
       class_id: req.session.class_id
     });
   } else {
