@@ -1,0 +1,14 @@
+h1= "r/tf2eastcoast Ultiduo Tournament"
+p= player
+  -
+  a(href="/logout")= "Logout"
+
+a(href="/play_1")= "Soldier"
+br
+a(href="/play_2")= "Medic"
+br
+a(href="/play_0")= "(Remove From Tournament)"
+
+p= !class_id? "No class selected" : (class_id === 2? "Medic":"Soldier")
+if class_id !== 0
+  img(src= "images/"+(class_id === 2? "medic":"solly")+".png")
