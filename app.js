@@ -86,7 +86,7 @@ app.get('/play_:class_id(0|1|2)', function(req, res) {
     });
     req.session.class_id = +req.params.class_id;
   }
-  res.redirect('/');
+  res.redirect('/signup');
 });
 
 // Login via Steam
