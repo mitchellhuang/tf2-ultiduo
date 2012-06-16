@@ -14,17 +14,17 @@ p
 	a(href='/play_0') Remove from tournament
 
 - if (class_id == 1)
-	p You are currently selected to play soldier.
+	p You are currently selected to play <b>soldier</b>.
 	p
 		img(src='images/solly.png', id='soldier_image', alt='soldier_image')
 - else if (class_id == 2)
-	p You are currently selected to play medic.
+	p You are currently selected to play <b>medic</b>.
 	p
 		img(src='images/medic.png', id='medic_image', alt='medic_image')
 - else
-	p You are currently not selected to play any class.
+	p You are currently <b>not selected to play any class</b> (You will not be registered in the tournament).
 
-p Your class choice will be locked in on [put a date here].
+p Your class choice will be locked in on <b>[put a date here]</b>.
 
 p
 	a(href='/logout') Logout
