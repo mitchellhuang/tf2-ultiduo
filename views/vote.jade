@@ -1,16 +1,21 @@
 h2 Select your class
-p player
+p 
+	="Hello, "
+	=player
 
 p
 	a(href='/play_1') Play Soldier
 p 
 	a(href='/play_2') Play Medic
+
+- if (class_id ==1)
+	p You are selected to play soldier.
+	p
+		img(src='images/solly.png', id='soldier_image', alt='soldier_image')
+
+
 p 
 	a(href='/play_0') Remove from tournament
-
-p= !class_id? "No class selected" : (class_id === 2? "Medic":"Soldier")
-if class_id !== 0
-  img(src= "images/"+(class_id === 2? "medic":"solly")+".png")
 
 p
 	a(href='/logout') Logout
