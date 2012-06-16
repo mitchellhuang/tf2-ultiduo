@@ -58,6 +58,13 @@ app.configure('production', function(){
 
 // Routes
 app.get('/', function(req, res) {
+    res.render('index', {
+      //steam_login: steam.genURL('http://' + config.hostname + '/verify', config.hostname),
+      steam_login: "signup"
+    });
+});
+
+app.get('/signup', function(req, res) {
   if (req.session.player) {
     console.log(req.session.player + " is class " + req.session.class_id);
     res.render('vote', {
@@ -65,11 +72,8 @@ app.get('/', function(req, res) {
       class_id: req.session.class_id
     });
   } else {
-    res.render('index', {
-      steam_login: steam.genURL('http://' + config.hostname + '/verify'
-                                , config.hostname),
-
-    });
+      var steam_login = steam.genURL('http://' + config.hostname + '/verify', config.hostname);
+      res.redirect(steam_login);
   }
 });
 
@@ -112,7 +116,7 @@ VALUES (?1,?2)", req.session.player, req.session.steamid);
             else
               req.session.class_id = row.class_id;
           }
-          res.redirect('/');
+          res.redirect('/signup');
         });
       } else {
         console.log("Login err: " + err);
