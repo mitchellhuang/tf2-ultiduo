@@ -1,7 +1,8 @@
-p 
-	="Hello, "
+p You are logged in as:
+
+h3 
 	=player
-	="["
+	=" ["
 	=steamid
 	="]"
 
@@ -15,15 +16,15 @@ p
 	a(href='/play_0') Remove from tournament
 
 - if (class_id == 1)
-	p You are selected to play soldier.
+	p You are currently selected to play soldier.
 	p
 		img(src='images/solly.png', id='soldier_image', alt='soldier_image')
 - else if (class_id == 2)
-	p You are selected to play medic.
+	p You are currently selected to play medic.
 	p
 		img(src='images/medic.png', id='medic_image', alt='medic_image')
 - else
-	p You are currently not registered in the tournament.
+	p You are currently not selected to play any class.
 
 p Your class choice will be locked in on [put a date here].
 
