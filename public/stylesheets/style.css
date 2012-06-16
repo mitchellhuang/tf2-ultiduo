@@ -1,9 +1,26 @@
 body {
-  padding: 50px;
-  font: 14px "Lucida Grande", Helvetica, Arial, sans-serif;
-  background: url(../images/bg.jpg) repeat-x #BBACA5;
+  font: 14px Helvetica, Arial, sans-serif;
+  background-image: url('http://cdn.huang.mx/i/89h5y.png');
 }
 
 a {
   color: #00B7FF;
+}
+
+#wrapper {
+    width: 800px;
+    height: 100%;
+    margin: 0px auto;
+    margin-top: 5px;
+    text-align: left;
+    font-size: 15px;
+    overflow: hidden;
+}
+
+#wrapper h1 {
+    font-size: 26px;
+}
+
+#map {
+    width: 400px;
 }

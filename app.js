@@ -8,9 +8,10 @@ var express = require('express')
 var sessionStore = new connect.middleware.session.MemoryStore()
 
 // Normally this would be an external file
+
 var config = {
-  port: 80,
-  hostname: '108.28.14.191.xip.io:3000'
+  port: 12345,
+  hostname: 'ultiduo.redditeast.com:12345'
 };
 
 var steam_api = new steam_data({ apiKey: '099F9C7186B869E44869FDD188635077',
@@ -126,7 +127,7 @@ app.get('/logout', function(req, res) {
   res.redirect('/');
 });
 
-app.listen(80, function(){
+app.listen(config.port, function(){
   console.log("Ultiduo Voting listening on port %d in %s mode"
             , app.address().port, app.settings.env);
 });
