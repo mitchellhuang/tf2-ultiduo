@@ -17,8 +17,24 @@ a {
     overflow: hidden;
 }
 
+#banner {
+    width: 800px;
+    height: 145px;
+}
+
 #wrapper h1 {
     font-size: 26px;
+}
+
+#sidebar {
+  float: left;
+  width: 50px;
+  font-size: 20px;
+}
+
+#main {
+  float: right;
+  width: 700px;
 }
 
 #map {

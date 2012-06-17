@@ -85,7 +85,7 @@ app.get('/signup', function(req, res) {
 });
 
 // Page to choose to play soldier (1) or Medic (2)
-app.get('/play_:class_id(0|1|2)', function(req, res) {
+app.get('/signup/play_:class_id(0|1|2)', function(req, res) {
   if (req.session.steamid) {
     db.run("UPDATE players SET class_id = $cid WHERE steamid = $sid", {
              $cid: ""+req.params.class_id,
@@ -94,6 +94,10 @@ app.get('/play_:class_id(0|1|2)', function(req, res) {
     req.session.class_id = +req.params.class_id;
   }
   res.redirect('/signup');
+});
+
+app.get('/players', function(req, res) {
+    res.render('players');
 });
 
 // Login via Steam
@@ -139,6 +143,6 @@ app.get('/logout', function(req, res) {
 });
 
 app.listen(config.port, function(){
-  console.log("Ultiduo Voting listening on port %d in %s mode"
+  console.log("Ultiduo Voting listening on port %d in %s mode."
             , app.address().port, app.settings.env);
 });
