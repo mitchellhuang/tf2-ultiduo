@@ -26,7 +26,7 @@ var steam_api = new steam_data({ apiKey: config.steam_api_key,
 
 // Load the sqlite database and setup the our tables, if they don't already
 // exist
-var db = new sqlite.Database('players.sqlite');
+var db = new sqlite.Database(config.db_file);
 
 db.run('CREATE TABLE IF NOT EXISTS "PLAYERS"                  \
 (                                                               \
