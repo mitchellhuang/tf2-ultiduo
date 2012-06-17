@@ -1,31 +1,21 @@
 doctype 5
 html
-	head
-		title= "Reddit 2012 Summer Ultiduo Tournament"
-		link(rel='shortcut icon', href='http://redditeast.com/favicon.ico')
-		link(rel='stylesheet', href='/stylesheets/style.css')
-		script(type='text/javascript')
+  head
+    title= "Reddit 2012 Summer Ultiduo Tournament"
+    link(rel='shortcut icon', href='http://redditeast.com/favicon.ico')
+    link(rel='stylesheet', href='/stylesheets/style.css')
+    include google_analytics.jade
 
-			var _gaq = _gaq || [];
-			_gaq.push(['_setAccount', 'UA-18938342-12']);
-			_gaq.push(['_trackPageview']);
-	
-				(function() {
-				var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
-				ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-	analytics.com/ga.js';
-				var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
-			})();
+  body
+    #wrapper
+      img(src="images/banner.png", id="banner",
+          alt="Reddit Summer Ultiduo Tournament")
 
-	body
-		#wrapper
-
-			img(src="images/banner.png", id="banner", alt="Reddit Summer Ultiduo Tournament")
-
-			#sidebar
-				p 
-					a(href='/') Home
-				p 
-					a(href='/signup') Signup
-				p
-					a(href='/players') Players
-			!=body
+      #sidebar
+        p
+          a(href='/') Home
+        p
+          a(href='/signup') Signup
+        p
+          a(href='/players') Players
+      !=body
