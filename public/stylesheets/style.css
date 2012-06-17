@@ -8,22 +8,22 @@ a {
 }
 
 #wrapper {
-    width: 800px;
-    height: 100%;
-    margin: 0px auto;
-    margin-top: 5px;
-    text-align: left;
-    font-size: 15px;
-    overflow: hidden;
+  width: 800px;
+  height: 100%;
+  margin: 0px auto;
+  margin-top: 5px;
+  text-align: left;
+  font-size: 15px;
+  overflow: hidden;
 }
 
 #banner {
-    width: 800px;
-    height: 145px;
+  width: 800px;
+  height: 145px;
 }
 
 #wrapper h1 {
-    font-size: 26px;
+  font-size: 26px;
 }
 
 #sidebar {
@@ -38,5 +38,5 @@ a {
 }
 
 #map {
-    width: 400px;
+  width: 400px;
 }
