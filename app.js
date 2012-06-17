@@ -34,6 +34,7 @@ db.run('CREATE TABLE IF NOT EXISTS "PLAYERS"                  \
  "id" INTEGER PRIMARY KEY  AUTOINCREMENT NOT NULL ,             \
  "name" TEXT NOT NULL check(typeof("name") = "text"),           \
  "steamid" TEXT NOT NULL UNIQUE check(typeof("steamid") = "text"),   \
+
  "class_id" INTEGER NOT NULL DEFAULT (0)                           \
 )');
 
@@ -65,9 +66,9 @@ app.configure('production', function(){
 
 // Routes
 app.get('/', function(req, res) {
-    res.render('index', {
-      steam_login: 'signup'
-    });
+  res.render('index', {
+    steam_login: 'signup'
+  });
 });
 
 app.get('/signup', function(req, res) {
@@ -89,8 +90,8 @@ app.get('/signup', function(req, res) {
 app.get('/signup/play_:class_id(0|1|2)', function(req, res) {
   if (req.session.steamid) {
     db.run("UPDATE players SET class_id = $cid WHERE steamid = $sid", {
-             $cid: ""+req.params.class_id,
-             $sid: req.session.steamid
+      $cid: ""+req.params.class_id,
+      $sid: req.session.steamid
     });
     req.session.class_id = +req.params.class_id;
   }
@@ -98,12 +99,12 @@ app.get('/signup/play_:class_id(0|1|2)', function(req, res) {
 });
 
 app.get('/players', function(req, res) {
-    db.query("SELECT name, steamid FROM players", function(row) {
-      for (var i = 0; i < row.length; i++) {
-        console.log(row[i].name);
-      }
-    });
-    //res.render('players');
+  db.query("SELECT name, steamid FROM players", function(row) {
+    for (var i = 0; i < row.length; i++) {
+      console.log(row[i].name);
+    }
+  });
+  //res.render('players');
 });
 
 // Login via Steam
@@ -118,15 +119,16 @@ app.get('/verify', steam.verify, function(req, res) {
         req.session.player = data.response.players[0].personaname;
 
         db.run("INSERT OR IGNORE INTO PLAYERS ('name','steamid') \
-VALUES (?1,?2)", req.session.player, req.session.steamid);
+                                       VALUES (?1,?2)",
+               req.session.player, req.session.steamid);
 
-        db.get("SELECT class_id FROM players WHERE steamid = '"
-               + req.session.steamid + "'", function(err, row) {
+        db.get("SELECT class_id FROM players WHERE steamid = $sid", {
+          $sid: req.session.steamid
+        }, function(err, row) {
           if (err) {
             console.log('DB Err: ' + err);
             req.session.class_id = 0;
-          }
-          else {
+          } else {
             console.log("DB Row:  " + row);
             if (typeof row === "undefined")
               req.session.class_id = 0;
@@ -135,6 +137,7 @@ VALUES (?1,?2)", req.session.player, req.session.steamid);
           }
           res.redirect('/signup');
         });
+
       } else {
         console.log("Login err: " + err);
         res.redirect('/');
