@@ -40,3 +40,8 @@ a {
   border-left: 1px solid gray;
   padding-left: 28px;
 }
+
+table.players img {
+  width: 20px;
+  height: 20px;
+}

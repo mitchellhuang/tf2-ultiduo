@@ -72,7 +72,6 @@ app.get('/', function(req, res) {
 
 app.get('/signup', function(req, res) {
   if (req.session.player) {
-    console.log(req.session.player + " is class " + req.session.class_id);
     res.render('vote', {
       player: req.session.player,
       steamid: req.session.steamid,
@@ -98,14 +97,15 @@ app.get('/signup/play_:class_id(0|1|2)', function(req, res) {
 });
 
 app.get('/players', function(req, res) {
-  db.each("SELECT name, steamid FROM players", function(err, row) {
+  var players = []
+  db.all("SELECT name, class_id FROM players", function(err, rows) {
     if (err) {
       console.log("DB Err: " + err);
       return;
     }
-    console.log(row.name);
+
+    res.render('players', { players: rows });
   });
-  res.render('players');
 });
 
 // Login via Steam
