@@ -8,11 +8,11 @@
 		="]"
 
 	p
-		a(href='/play_1') Play Soldier
+		a(href='/signup/play_1') Play Soldier
 	p 
-		a(href='/play_2') Play Medic
+		a(href='/signup/play_2') Play Medic
 	p 
-		a(href='/play_0') Remove from tournament
+		a(href='/signup/play_0') Remove from tournament
 
 	- if (class_id == 1)
 		p You are currently selected to play <b>soldier</b>.
@@ -23,12 +23,11 @@
 		p
 			img(src='http://cdn.redditgaming.com/ultiduo/medic.png', id='medic_image', alt='medic_image')
 	- else
-		p You are currently <b>not selected to play any class</b>. (You will not be registered in the tournament)
-		p If you would like to play, please select a class above.
+		p You are currently <b>not selected to play any class</b>.
 
 	p Your class choice will be locked in on <b>[put a date here]</b>.
 
 	p Teams will be assigned on <b>[put another date here]</b>.
 
 	p
-		a(href='/logout') Logout and return to main page.
+		a(href='/logout') Logout
