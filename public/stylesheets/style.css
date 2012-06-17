@@ -9,7 +9,9 @@ a {
 
 #banner {
   width: 800px;
-  height: 145px;
+  height: 125px;
+  background-image: url('http://cdn.huang.mx/i/kJRjW.png');
+  margin-bottom: 10px;
 }
 
 #wrapper {
@@ -28,11 +30,13 @@ a {
 
 #sidebar {
   float: left;
-  width: 50px;
+  width: 65px;
   font-size: 20px;
 }
 
 #main {
   float: right;
-  width: 700px;
+  width: 680px;
+  border-left: 1px solid gray;
+  padding-left: 28px;
 }
