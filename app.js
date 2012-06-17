@@ -14,7 +14,7 @@ var express    = require('express')
   , sqlite     = require('sqlite3')
   , steam_data = require('steam')
   , steam      = require('./steam.js')
-  , underscore = require('underscore');
+  , _          = require('underscore');
 
 var app = module.exports = express.createServer();
 
