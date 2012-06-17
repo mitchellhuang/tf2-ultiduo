@@ -15,18 +15,19 @@ var express    = require('express')
   , steam_data = require('steam')
   , steam      = require('./steam.js');
 
+var app = module.exports = express.createServer();
 
 // Load config settings for the mode we're running in
 // (should be 'development' or 'production')
 var config = require('./config.' + app.settings.env + '.js');
 
-// Load a
 var steam_api = new steam_data({ apiKey: config.steam_api_key,
                                  format: 'json' });
 
+// Load the sqlite database and setup the our tables, if they don't already
+// exist
 var db = new sqlite.Database('players.sqlite');
 
-// Make sure the table exists
 db.run('CREATE TABLE IF NOT EXISTS "PLAYERS"                  \
 (                                                               \
  "id" INTEGER PRIMARY KEY  AUTOINCREMENT NOT NULL ,             \
@@ -34,8 +35,6 @@ db.run('CREATE TABLE IF NOT EXISTS "PLAYERS"                  \
  "steamid" TEXT NOT NULL UNIQUE check(typeof("steamid") = "text"),   \
  "class_id" INTEGER NOT NULL DEFAULT (0)                           \
 )');
-
-var app = module.exports = express.createServer();
 
 // Configuration
 app.configure(function(){
@@ -47,9 +46,9 @@ app.configure(function(){
   app.use(express.cookieParser());
   app.use(express.session({ secret: 'ultiduo949172463r57276'
                           , key: 'express.sid'
-                          , store: sessionStore
+                          , store: new connect.middleware.session.MemoryStore()
+                          // Cookies expire in 5 days (or when server restarts)
                           , cookie: { maxAge: 5 * 24 * 60 * 60 * 1000 } }));
-  app.use(express.compiler({ src: pubdir, enable: ['less'] }));
   app.use(app.router);
   app.use(express.static(pubdir));
 });
