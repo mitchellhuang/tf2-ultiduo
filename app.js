@@ -1,23 +1,28 @@
-var express = require('express')
-  , connect = require('connect')
-  , less = require('less')
-  , sqlite = require('sqlite3')
+/*  TF2 Ultiduo Tournament
+
+    An app server to manage the signup and running of a tf2 ultiduo tournament.
+
+    Originally designed for a reddit tournament.
+
+    Author: Gcommer
+*/
+
+// Module imports
+var express    = require('express')
+  , connect    = require('connect')
+  , less       = require('less')
+  , sqlite     = require('sqlite3')
   , steam_data = require('steam')
-  , steam = require('./steam.js');
+  , steam      = require('./steam.js');
 
-var sessionStore = new connect.middleware.session.MemoryStore()
 
-// Normally this would be an external file
+// Load config settings for the mode we're running in
+// (should be 'development' or 'production')
+var config = require('./config.' + app.settings.env + '.js');
 
-var config = {
-  port: 12345,
-  hostname: 'ultiduo.redditeast.com:12345'
-};
-
-var steam_api = new steam_data({ apiKey: '099F9C7186B869E44869FDD188635077',
+// Load a
+var steam_api = new steam_data({ apiKey: config.steam_api_key,
                                  format: 'json' });
-
-var app = module.exports = express.createServer();
 
 var db = new sqlite.Database('players.sqlite');
 
@@ -29,6 +34,8 @@ db.run('CREATE TABLE IF NOT EXISTS "PLAYERS"                  \
  "steamid" TEXT NOT NULL UNIQUE check(typeof("steamid") = "text"),   \
  "class_id" INTEGER NOT NULL DEFAULT (0)                           \
 )');
+
+var app = module.exports = express.createServer();
 
 // Configuration
 app.configure(function(){
@@ -49,7 +56,7 @@ app.configure(function(){
 
 app.configure('development', function(){
   app.use(express.errorHandler({ dumpExceptions: true, showStack: true }));
-//  app.use(express.logger());
+  app.use(express.logger());
 });
 
 app.configure('production', function(){
@@ -66,7 +73,7 @@ app.get('/', function(req, res) {
     });
   } else {
     res.render('index', {
-      steam_login: steam.genURL('http://' + config.hostname + '/verify'
+      steam_login: steam.genURL('http://' + req.headers.host + '/verify'
                                 , config.hostname),
 
     });
