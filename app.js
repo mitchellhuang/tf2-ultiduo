@@ -64,18 +64,23 @@ app.configure('production', function(){
 
 // Routes
 app.get('/', function(req, res) {
+    res.render('index', {
+      steam_login: 'signup'
+    });
+});
+
+app.get('/signup', function(req, res) {
   if (req.session.player) {
     console.log(req.session.player + " is class " + req.session.class_id);
     res.render('vote', {
       player: req.session.player,
+      steamid: req.session.steamid,
       class_id: req.session.class_id
     });
   } else {
-    res.render('index', {
-      steam_login: steam.genURL('http://' + req.headers.host + '/verify'
-                                , config.hostname),
-
-    });
+    var steam_login = steam.genURL('http://' + req.headers.host + '/verify',
+                                   req.headers.host);
+    res.redirect(steam_login);
   }
 });
 
@@ -88,7 +93,7 @@ app.get('/play_:class_id(0|1|2)', function(req, res) {
     });
     req.session.class_id = +req.params.class_id;
   }
-  res.redirect('/');
+  res.redirect('/signup');
 });
 
 // Login via Steam
@@ -118,7 +123,7 @@ VALUES (?1,?2)", req.session.player, req.session.steamid);
             else
               req.session.class_id = row.class_id;
           }
-          res.redirect('/');
+          res.redirect('/signup');
         });
       } else {
         console.log("Login err: " + err);

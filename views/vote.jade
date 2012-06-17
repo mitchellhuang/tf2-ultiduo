@@ -1,14 +1,30 @@
-h1= "r/tf2eastcoast Ultiduo Tournament"
-p= player
-  -
-  a(href="/logout")= "Logout"
+h2 Select your class:
 
-a(href="/play_1")= "Soldier"
-br
-a(href="/play_2")= "Medic"
-br
-a(href="/play_0")= "(Remove From Tournament)"
+h3
+	=player
+	=" ["
+	=steamid
+	="]"
 
-p= !class_id? "No class selected" : (class_id === 2? "Medic":"Soldier")
-if class_id !== 0
-  img(src= "images/"+(class_id === 2? "medic":"solly")+".png")
+p
+	a(href='/play_1') Play Soldier
+p 
+	a(href='/play_2') Play Medic
+p 
+	a(href='/play_0') Remove from tournament
+
+- if (class_id == 1)
+	p You are currently selected to play <b>soldier</b>.
+	p
+		img(src='images/soldier.png', id='soldier_image', alt='soldier_image')
+- else if (class_id == 2)
+	p You are currently selected to play <b>medic</b>.
+	p
+		img(src='images/medic.png', id='medic_image', alt='medic_image')
+- else
+	p You are currently <b>not selected to play any class</b>. (You will not be registered in the tournament)
+
+p Your class choice will be locked in on <b>[put a date here]</b>.
+
+p
+	a(href='/logout') Logout
