@@ -11,6 +11,7 @@ a {
   width: 800px;
   height: 125px;
   background-image: url('http://cdn.huang.mx/i/kJRjW.png');
+  margin-bottom: 10px;
 }
 
 #wrapper {
