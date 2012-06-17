@@ -130,7 +130,6 @@ app.get('/verify', steam.verify, function(req, res) {
             console.log('DB Err: ' + err);
             req.session.class_id = 0;
           } else {
-            console.log("DB Row:  " + row);
             if (typeof row === "undefined")
               req.session.class_id = 0;
             else
