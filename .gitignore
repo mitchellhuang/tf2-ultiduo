@@ -1,5 +1,4 @@
 node_modules/
 *~
 [#]*[#]
-players.sqlite
-db.sqlite
+*sqlite
