@@ -97,7 +97,12 @@ app.get('/signup/play_:class_id(0|1|2)', function(req, res) {
 });
 
 app.get('/players', function(req, res) {
-    res.render('players');
+    db.query("SELECT name, steamid FROM players", function(row) {
+      for (var i = 0; i < row.length; i++) {
+        console.log(row[i].name);
+      }
+    });
+    //res.render('players');
 });
 
 // Login via Steam
@@ -121,7 +126,7 @@ VALUES (?1,?2)", req.session.player, req.session.steamid);
             req.session.class_id = 0;
           }
           else {
-            console.log("db row:  " + row);
+            console.log("DB Row:  " + row);
             if (typeof row === "undefined")
               req.session.class_id = 0;
             else
