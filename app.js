@@ -34,7 +34,6 @@ db.run('CREATE TABLE IF NOT EXISTS "PLAYERS"                  \
  "id" INTEGER PRIMARY KEY  AUTOINCREMENT NOT NULL ,             \
  "name" TEXT NOT NULL check(typeof("name") = "text"),           \
  "steamid" TEXT NOT NULL UNIQUE check(typeof("steamid") = "text"),   \
-
  "class_id" INTEGER NOT NULL DEFAULT (0)                           \
 )');
 
@@ -50,7 +49,7 @@ app.configure(function(){
                           , key: 'express.sid'
                           , store: new connect.middleware.session.MemoryStore()
                           // Cookies expire in 5 days (or when server restarts)
-                          , cookie: { maxAge: 5 * 24 * 60 * 60 * 1000 } }));
+                          , cookie: { m02axAge: 5 * 24 * 60 * 60 * 1000 } }));
   app.use(app.router);
   app.use(express.static(pubdir));
 });
@@ -99,12 +98,14 @@ app.get('/signup/play_:class_id(0|1|2)', function(req, res) {
 });
 
 app.get('/players', function(req, res) {
-  db.query("SELECT name, steamid FROM players", function(row) {
-    for (var i = 0; i < row.length; i++) {
-      console.log(row[i].name);
+  db.each("SELECT name, steamid FROM players", function(err, row) {
+    if (err) {
+      console.log("DB Err: " + err);
+      return;
     }
+    console.log(row.name);
   });
-  //res.render('players');
+  res.render('players');
 });
 
 // Login via Steam
