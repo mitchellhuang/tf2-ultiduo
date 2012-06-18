@@ -39,10 +39,16 @@ a {
   width: 680px;
   border-left: 1px solid gray;
   padding-left: 28px;
-  min-height: 150px;
+  min-height: 320px;
 }
 
-table.players img {
-  width: 20px;
-  height: 20px;
+table.players {
+  width: 100%;
+}
+
+#sidebar hr {
+  border: 0;
+  height: 1px;
+  color: #000000;
+  background-color: #000000;
 }

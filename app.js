@@ -70,6 +70,20 @@ app.get('/', function(req, res) {
   });
 });
 
+app.get('/rules', function(req, res) {
+  res.render('rules');
+});
+
+app.get('/time', function(req, res) {
+  res.render('time', {
+    live_time: Date.now()
+  });
+});
+
+app.get('/credits', function(req, res) {
+  res.render('credits');
+});
+
 app.get('/signup', function(req, res) {
   if (req.session.player) {
     res.render('vote', {
