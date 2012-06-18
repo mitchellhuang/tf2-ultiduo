@@ -98,7 +98,7 @@ app.get('/signup/play_:class_id(0|1|2)', function(req, res) {
 
 app.get('/players', function(req, res) {
   var players = []
-  db.all("SELECT name, class_id FROM players", function(err, rows) {
+  db.all("SELECT name, class_id, steamid FROM players", function(err, rows) {
     if (err) {
       console.log("DB Err: " + err);
       return;

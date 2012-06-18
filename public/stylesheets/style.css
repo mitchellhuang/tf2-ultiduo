@@ -39,6 +39,7 @@ a {
   width: 680px;
   border-left: 1px solid gray;
   padding-left: 28px;
+  min-height: 150px;
 }
 
 table.players img {

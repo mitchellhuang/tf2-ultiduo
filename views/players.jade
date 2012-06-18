@@ -1,13 +1,19 @@
+h2 Registered Players
+
 table.players
   tr
     th Player
+    th SteamID
     th Class
 
   each player in players
-    tr
-      td !{player.name}
-      td
-        - if (player.class_id == 1)
-          img(src='http://cdn.huang.mx/i/wyrHi.png', alt='soldier')
-        - else if (player.class_id == 2)
-          img(src='http://cdn.huang.mx/i/nBGRi.png', alt='medic')
+    - if (player.class_id != 0)
+      tr
+        td !{player.name}
+        td !{player.steamid}
+        td
+          - if (player.class_id == 1)
+            | Soldier
+
+          - else if (player.class_id == 2)
+            | Medic
