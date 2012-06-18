@@ -5,12 +5,6 @@
 
 import sys, random, sqlite3
 
-def file_exists(filename):
-	try:
-		with open(filename): return True
-	except:
-		return False
-
 if len(sys.argv) != 3:
         sys.exit('Usage: shuffle.py [db name] [number of players]')
 else:
