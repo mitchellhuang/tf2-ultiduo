@@ -1,5 +1,7 @@
 #!/usr/bin/python
 # WIP, only inserts steamid's
+# Execute from the command line
+# Usage: shuffle.py [db name] [number of players]
 
 import sys, random, sqlite3, os
 
@@ -10,7 +12,7 @@ def file_exists(filename):
 		return False
 
 if len(sys.argv) != 3:
-        sys.exit('Usage: assignteams.py [db name] [number of players]')
+        sys.exit('Usage: shuffle.py [db name] [number of players]')
 else:
 	dbname = sys.argv[1]
 	totalplayers = int(sys.argv[2])
@@ -51,7 +53,7 @@ else:
 	connection = sqlite3.connect('teams.sqlite')
 	cursor=connection.cursor()
 
-	cursor.execute('DROP TABLE teams')
+	cursor.execute('DROP TABLE IF EXISTS teams')
 	cursor.execute('CREATE TABLE teams (id INTEGER, soldier_name TEXT, soldier_id TEXT, medic_name TEXT, medic_id TEXT)')
 	
 	# insert shuffled data into teams.sqlite DB
