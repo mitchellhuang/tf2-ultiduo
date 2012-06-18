@@ -1,10 +1,10 @@
 body {
   font: 14px Helvetica, Arial, sans-serif;
-  background-image: url('http://cdn.huang.mx/i/89h5y.png');
+  background-image: url('http://cdn.huang.mx/i/ZRck4.jpg');
 }
 
 a {
-  color: #00B7FF;
+  color: #F14E32;
 }
 
 #banner {
@@ -37,9 +37,8 @@ a {
 #main {
   float: right;
   width: 680px;
-  border-left: 1px solid gray;
-  padding-left: 28px;
-  min-height: 320px;
+  padding: 5px 20px 20px 20px;
+  background: #FCFCFA;
 }
 
 table.players {
@@ -48,7 +47,11 @@ table.players {
 
 #sidebar hr {
   border: 0;
-  height: 1px;
-  color: #000000;
-  background-color: #000000;
+  height: 8px;
+  color: #FFFFFF;
+  background-color: #FFFFFF;
 }
+
+  #time_is_link {
+    display: none;
+  }

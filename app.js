@@ -75,9 +75,7 @@ app.get('/rules', function(req, res) {
 });
 
 app.get('/time', function(req, res) {
-  res.render('time', {
-    live_time: Date.now()
-  });
+  res.render('time');
 });
 
 app.get('/credits', function(req, res) {
