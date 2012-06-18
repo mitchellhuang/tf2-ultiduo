@@ -3,7 +3,7 @@
 # Execute from the command line
 # Usage: shuffle.py [db name] [number of players]
 
-import sys, random, sqlite3, os
+import sys, random, sqlite3
 
 def file_exists(filename):
 	try:
