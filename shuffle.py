@@ -22,7 +22,7 @@ else:
 	rawmedics = cursor.fetchall()
 
 	if totalplayers != (len(rawsoldiers) + len(rawmedics)):
-		sys.exit('ERROR, not enough data.')
+		sys.exit('ERROR, not enough data. Or something went wrong.')
 
 	soldiernumbers = []
 	for i in range(totalplayers/2):
@@ -38,10 +38,6 @@ else:
 	print "Shuffling medics..."
 	random.shuffle(medicnumbers)
 
-	# initiate DB connection
-	connection = sqlite3.connect('teams.sqlite')
-	cursor=connection.cursor()
-
 	cursor.execute('DROP TABLE IF EXISTS teams')
 	cursor.execute('CREATE TABLE teams (id INTEGER, soldier_name TEXT, soldier_id TEXT, medic_name TEXT, medic_id TEXT)')
 	
@@ -53,7 +49,6 @@ else:
 		connection.commit()
 
 	# close db connections
-	cursor.close()
 	cursor.close()
 
 	print "Done."
