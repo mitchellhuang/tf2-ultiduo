@@ -52,6 +52,6 @@ table.players {
   background-color: #FFFFFF;
 }
 
-  #time_is_link {
-    display: none;
-  }
+#time_is_link {
+  display: none;
+}
