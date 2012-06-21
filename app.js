@@ -14,6 +14,7 @@ var express    = require('express')
   , sqlite     = require('sqlite3')
   , steam_data = require('steam')
   , steam      = require('./steam.js')
+  , async      = require('async')
   , _          = require('underscore');
 
 var app = module.exports = express.createServer();
@@ -29,13 +30,27 @@ var steam_api = new steam_data({ apiKey: config.steam_api_key,
 // exist
 var db = new sqlite.Database(config.db_file);
 
-db.run('CREATE TABLE IF NOT EXISTS "PLAYERS"                  \
-(                                                               \
- "id" INTEGER PRIMARY KEY  AUTOINCREMENT NOT NULL ,             \
- "name" TEXT NOT NULL check(typeof("name") = "text"),           \
- "steamid" TEXT NOT NULL UNIQUE check(typeof("steamid") = "text"),   \
- "class_id" INTEGER NOT NULL DEFAULT (0)                           \
+db.run('CREATE TABLE IF NOT EXISTS "PLAYERS"                        \
+(                                                                   \
+ "id" INTEGER PRIMARY KEY  AUTOINCREMENT NOT NULL ,                 \
+ "name" TEXT NOT NULL check(typeof("name") = "text"),               \
+ "steamid" TEXT NOT NULL UNIQUE check(typeof("steamid") = "text"),  \
+ "class_id" INTEGER NOT NULL DEFAULT (0)                            \
 )');
+
+var class_counts = [0, 0, 0];
+
+function loadClassCounts(callback) {
+  db.get('SELECT                                                    \
+(SELECT COUNT(*) FROM [PLAYERS] WHERE class_id=1) as count_solly,   \
+(SELECT COUNT(*) FROM [PLAYERS] WHERE class_id=2) as count_med',
+         function(err, row) {
+           class_counts[1] = row.count_solly;
+           class_counts[2] = row.count_med;
+
+           callback(null);
+         });
+}
 
 // Configuration
 app.configure(function(){
@@ -63,6 +78,15 @@ app.configure('production', function(){
   app.use(express.errorHandler());
 });
 
+// Parameter Pre-conditions
+app.param('class_id', function(req, res, next, id) {
+  id = +id;
+  if (id >= 0 && id <= 2)
+    next();
+  else
+    next(new Error('Invalid class id: ' + id));
+});
+
 // Routes
 app.get('/', function(req, res) {
   res.render('index', {
@@ -84,10 +108,24 @@ app.get('/credits', function(req, res) {
 
 app.get('/signup', function(req, res) {
   if (req.session.player) {
+
+    // ?full=:class_id parameter, to show when someone tried to change to
+    // a class that is full
+    var full_class = +req.query.full;
+    if (full_class === 1 || full_class === 2) {
+      res.local('full_class', true);
+      res.local('full_class_name', full_class === 1? "soldier" : "medic");
+    } else
+      res.local('full_class', false);
+
     res.render('vote', {
       player: req.session.player,
       steamid: req.session.steamid,
-      class_id: req.session.class_id
+      class_id: req.session.class_id,
+
+      count_solly: class_counts[1],
+      count_med: class_counts[2],
+      class_limit: config.max_players_per_class
     });
   } else {
     var steam_login = steam.genURL('http://' + req.headers.host + '/verify',
@@ -97,14 +135,26 @@ app.get('/signup', function(req, res) {
 });
 
 // Page to choose to play soldier (1) or Medic (2)
-app.get('/signup/play_:class_id(0|1|2)', function(req, res) {
+app.get('/signup/play_:class_id', function(req, res) {
+  var class_id = +req.params.class_id;
+
   if (req.session.steamid) {
-    db.run("UPDATE players SET class_id = $cid WHERE steamid = $sid", {
-      $cid: ""+req.params.class_id,
-      $sid: req.session.steamid
-    });
-    req.session.class_id = +req.params.class_id;
+    if (class_counts[class_id] < config.max_players_per_class) {
+      db.run("UPDATE players SET class_id = $cid WHERE steamid = $sid", {
+        $cid: "" + class_id,
+        $sid: req.session.steamid
+      });
+
+      class_counts[req.session.class_id]--;
+      class_counts[class_id]++;
+
+      req.session.class_id = class_id;
+    } else {
+      res.redirect('/signup?full=' + class_id);
+      return;
+    }
   }
+
   res.redirect('/signup');
 });
 
@@ -164,7 +214,17 @@ app.get('/logout', function(req, res) {
   res.redirect('/');
 });
 
-app.listen(config.port, function(){
-  console.log("Ultiduo Voting listening on port %d in %s mode."
-            , app.address().port, app.settings.env);
+// Tasks to run before starting the server:
+async.parallel([
+  loadClassCounts
+], function(err) {
+  if (err) {
+    console.log("Error starting ultiduo server:\n" + err);
+    return;
+  }
+
+  app.listen(config.port, function(){
+    console.log("Ultiduo Voting listening on port %d in %s mode."
+                , app.address().port, app.settings.env);
+  });
 });

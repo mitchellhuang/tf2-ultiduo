@@ -55,3 +55,7 @@ table.players {
 #time_is_link {
   display: none;
 }
+
+#full_class {
+  color: red;
+}
