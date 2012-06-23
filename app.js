@@ -117,7 +117,7 @@ app.get('/signup', function(req, res) {
     } else
       res.local('full_class', false);
 
-    res.render('vote', {
+    res.render('signup', {
       player: req.session.player,
       steamid: req.session.steamid,
       class_id: req.session.class_id,
@@ -129,7 +129,7 @@ app.get('/signup', function(req, res) {
   } else {
     var steam_login = steam.genURL('http://' + req.headers.host + '/verify',
                                    'http://' + req.headers.host);
-    res.render('vote', {
+    res.render('signup', {
       steam_url: steam_login
     });
   }
