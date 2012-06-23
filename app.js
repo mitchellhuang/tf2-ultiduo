@@ -129,7 +129,9 @@ app.get('/signup', function(req, res) {
   } else {
     var steam_login = steam.genURL('http://' + req.headers.host + '/verify',
                                    'http://' + req.headers.host);
-    res.redirect(steam_login);
+    res.render('vote', {
+      steam_url: steam_login
+    });
   }
 });
 
