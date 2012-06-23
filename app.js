@@ -10,7 +10,6 @@
 // Module imports
 var express    = require('express')
   , connect    = require('connect')
-  , less       = require('less')
   , sqlite     = require('sqlite3')
   , steam_data = require('steam')
   , steam      = require('./steam.js')
