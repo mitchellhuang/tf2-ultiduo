@@ -7,6 +7,9 @@ a {
   color: #F14E32;
 }
 
+/* Stupid IE */
+img { border: none; }
+
 #banner {
   width: 800px;
   height: 125px;
