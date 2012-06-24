@@ -15,37 +15,31 @@ else:
 	connection = sqlite3.connect(dbname)
 	cursor = connection.cursor()
 
-	# select all players and store in variable
-	cursor.execute("SELECT name, steamid FROM players WHERE class_id='1'")
-	rawsoldiers = cursor.fetchall()
-	cursor.execute("SELECT name, steamid FROM players WHERE class_id='2'")
-	rawmedics = cursor.fetchall()
+	# select all players steamid and store in variable
+	cursor.execute("SELECT steamid FROM players WHERE class_id='1'")
+	soldiers = list(zip(*cursor.fetchall())[0])
+	cursor.execute("SELECT steamid FROM players WHERE class_id='2'")
+	medics = list(zip(*cursor.fetchall())[0])
 
-	if totalplayers != (len(rawsoldiers) + len(rawmedics)):
+	if totalplayers != (len(soldiers) + len(medics)):
 		sys.exit('ERROR, not enough data. Or something went wrong.')
 
-	soldiernumbers = []
-	for i in range(totalplayers/2):
-		soldiernumbers.append(i)
-
 	print "Shuffling soldiers..."
-	random.shuffle(soldiernumbers)
-
-	medicnumbers = []
-	for i in range(totalplayers/2):
-		medicnumbers.append(i)
+	random.shuffle(soldiers)
+	print soldiers
 
 	print "Shuffling medics..."
-	random.shuffle(medicnumbers)
+	random.shuffle(medics)
+	print medics
 
 	cursor.execute('DROP TABLE IF EXISTS teams')
-	cursor.execute('CREATE TABLE teams (id INTEGER, soldier_name TEXT, soldier_id TEXT, medic_name TEXT, medic_id TEXT)')
+	cursor.execute('CREATE TABLE teams (id INTEGER, soldier_id TEXT, medic_id TEXT)')
 	
 	# insert shuffled data into teams.sqlite DB
 	print "Inserting data to new database..."
 	for n in range(totalplayers/2):
 		id = n + 1
-		cursor.execute("INSERT INTO teams VALUES (?, ?, ?, ?, ?)", (id, rawsoldiers[soldiernumbers[n]][0], rawsoldiers[soldiernumbers[n]][1], rawmedics[medicnumbers[n]][0], rawmedics[medicnumbers[n]][1]))
+		cursor.execute("INSERT INTO teams VALUES (?, ?, ?)", (id, soldiers[n], medics[n]))
 		connection.commit()
 
 	# close db connections
