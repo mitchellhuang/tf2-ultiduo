@@ -79,7 +79,7 @@ app.configure('production', function(){
 
 // Parameter Pre-conditions
 app.param('class_id', function(req, res, next, id) {
-  id = +id;
+  var id = +id;
   if (id >= 0 && id <= 2)
     next();
   else
@@ -120,15 +120,24 @@ app.get('/credits', function(req, res) {
   res.render('credits');
 });
 
-app.get('/signup', require_login, function(req, res) {
-  // ?full=:class_id parameter, to show when someone tried to change to
-  // a class that is full
-  var full_class = +req.query.full;
-  if (full_class === 1 || full_class === 2) {
+app.get('/signup/:class_id?', require_login, function(req, res) {
+  var class_id = +req.params.class_id;
+  res.local('full_class', false);
+  if (req.params.class_id
+   && class_counts[class_id] < config.max_players_per_class) {
+    db.run("UPDATE players SET class_id = $cid WHERE steamid = $sid", {
+      $cid: "" + class_id,
+      $sid: req.session.steamid
+    });
+
+    class_counts[req.session.class_id]--;
+    class_counts[class_id]++;
+
+    req.session.class_id = class_id;
+  } else {
     res.local('full_class', true);
-    res.local('full_class_name', full_class === 1? "soldier" : "medic");
-  } else
-    res.local('full_class', false);
+    res.local('full_class_name', class_id === 1? "soldier" : "medic");
+  }
 
   res.render('signup', {
     player: req.session.player,
@@ -139,30 +148,6 @@ app.get('/signup', require_login, function(req, res) {
     count_med: class_counts[2],
     class_limit: config.max_players_per_class
   });
-});
-
-// Page to choose to play soldier (1) or Medic (2)
-app.get('/signup/play_:class_id', function(req, res) {
-  var class_id = +req.params.class_id;
-
-  if (req.session.steamid) {
-    if (class_counts[class_id] < config.max_players_per_class) {
-      db.run("UPDATE players SET class_id = $cid WHERE steamid = $sid", {
-        $cid: "" + class_id,
-        $sid: req.session.steamid
-      });
-
-      class_counts[req.session.class_id]--;
-      class_counts[class_id]++;
-
-      req.session.class_id = class_id;
-    } else {
-      res.redirect('/signup?full=' + class_id);
-      return;
-    }
-  }
-
-  res.redirect('/signup');
 });
 
 app.get('/players', function(req, res) {
