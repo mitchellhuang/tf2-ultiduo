@@ -10,15 +10,15 @@ p
   - if (class_id === 1)
     | Play Soldier
   - else
-    a(href='/signup/1') Play Soldier
+    a(href='/signup/1/' + csrf) Play Soldier
   |  [#{count_solly}/#{class_limit}]
 p
   - if (class_id === 2)
     | Play Medic
   - else
-    a(href='/signup/2') Play Medic
+    a(href='/signup/2/' + csrf) Play Medic
   |  [#{count_med}/#{class_limit}]
-p: a(href='/signup/0') Remove from tournament
+p: a(href='/signup/0/' + csrf) Remove from tournament
 
 - if (class_id == 1)
   p You are currently selected to play <b>soldier</b>.

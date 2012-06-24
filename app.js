@@ -121,9 +121,9 @@ app.get('/credits', function(req, res) {
   res.render('credits');
 });
 
-app.get('/signup/:class_id?', require_login, function(req, res) {
+app.get('/signup/:class_id?/:csrf?', require_login, function(req, res) {
   res.local('full_class', false);
-  if (req.params.class_id) {
+  if (req.params.class_id && req.params.csrf === req.session._csrf) {
     var class_id = +req.params.class_id;
 
     // Check that there is an available slot for the selected class:
@@ -147,6 +147,8 @@ app.get('/signup/:class_id?', require_login, function(req, res) {
     player: req.session.player,
     steamid: req.session.steamid,
     class_id: req.session.class_id,
+
+    csrf: encodeURIComponent(req.session._csrf),
 
     count_solly: class_counts[1],
     count_med: class_counts[2],
