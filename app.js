@@ -64,6 +64,7 @@ app.configure(function(){
                           , store: new connect.middleware.session.MemoryStore()
                           // Cookies expire in 5 days (or when server restarts)
                           , cookie: { m02axAge: 5 * 24 * 60 * 60 * 1000 } }));
+  app.use(connect.csrf());
   app.use(app.router);
   app.use(express.static(pubdir));
 });
