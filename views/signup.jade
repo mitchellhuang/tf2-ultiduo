@@ -7,10 +7,16 @@ h3 #{player} [SteamID: #{steamid}]
     | Sorry, but there are no more available #{full_class_name} slots!
 
 p
-  a(href='/signup/1') Play Soldier
+  - if (class_id === 1)
+    | Play Soldier
+  - else
+    a(href='/signup/1') Play Soldier
   |  [#{count_solly}/#{class_limit}]
 p
-  a(href='/signup/2') Play Medic
+  - if (class_id === 2)
+    | Play Medic
+  - else
+    a(href='/signup/2') Play Medic
   |  [#{count_med}/#{class_limit}]
 p: a(href='/signup/0') Remove from tournament
 
