@@ -178,8 +178,6 @@ app.get('/players', function(req, res) {
   });
 });
 
-
-
 // Login via Steam
 app.get('/verify', steam.verify, function(req, res) {
   console.log('User logged in: ' + req.steamid);
