@@ -122,22 +122,25 @@ app.get('/credits', function(req, res) {
 });
 
 app.get('/signup/:class_id?', require_login, function(req, res) {
-  var class_id = +req.params.class_id;
   res.local('full_class', false);
-  if (req.params.class_id
-   && class_counts[class_id] < config.max_players_per_class) {
-    db.run("UPDATE players SET class_id = $cid WHERE steamid = $sid", {
-      $cid: "" + class_id,
-      $sid: req.session.steamid
-    });
+  if (req.params.class_id) {
+    var class_id = +req.params.class_id;
 
-    class_counts[req.session.class_id]--;
-    class_counts[class_id]++;
+    // Check that there is an available slot for the selected class:
+    if (class_counts[class_id] < config.max_players_per_class) {
+      db.run("UPDATE players SET class_id = $cid WHERE steamid = $sid", {
+        $cid: "" + class_id,
+        $sid: req.session.steamid
+      });
 
-    req.session.class_id = class_id;
-  } else {
-    res.local('full_class', true);
-    res.local('full_class_name', class_id === 1? "soldier" : "medic");
+      class_counts[req.session.class_id]--;
+      class_counts[class_id]++;
+
+      req.session.class_id = class_id;
+    } else {
+      res.local('full_class', true);
+      res.local('full_class_name', class_id === 1? "soldier" : "medic");
+    }
   }
 
   res.render('signup', {
