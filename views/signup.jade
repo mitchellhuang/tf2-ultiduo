@@ -1,37 +1,30 @@
-- if (typeof(steam_url) != 'undefined')
-  p Please sign in through Steam below to register:
-  a(href='#{steam_url}'): img(src="http://cdn.huang.mx/i/SLRAZ.png",
-                              alt="Sign in through Steam")
+h2 Select your class
 
+h3 #{player} [SteamID: #{steamid}]
+
+- if (full_class)
+  p#full_class
+   | Sorry, but there are no more available #{full_class_name} slots!
+
+p
+  a(href='/signup/play_1') Play Soldier
+  |  [#{count_solly}/#{class_limit}]
+p
+  a(href='/signup/play_2') Play Medic
+  |  [#{count_med}/#{class_limit}]
+p: a(href='/signup/play_0') Remove from tournament
+
+- if (class_id == 1)
+  p You are currently selected to play <b>soldier</b>.
+  img(src='http://cdn.huang.mx/i/wyrHi.png', id='soldier_image',
+      alt='soldier_image')
+- else if (class_id == 2)
+  p You are currently selected to play <b>medic</b>.
+  img(src='http://cdn.huang.mx/i/nBGRi.png', id='medic_image',
+      alt='medic_image')
 - else
+  p You are currently <b>not selected to play any class</b>.
 
-  h2 Select your class
-
-  h3 #{player} [SteamID: #{steamid}]
-
-  - if (full_class)
-    p#full_class
-      | Sorry, but there are no more available #{full_class_name} slots!
-
-  p
-    a(href='/signup/play_1') Play Soldier
-    |  [#{count_solly}/#{class_limit}]
-  p
-    a(href='/signup/play_2') Play Medic
-    |  [#{count_med}/#{class_limit}]
-  p: a(href='/signup/play_0') Remove from tournament
-
-  - if (class_id == 1)
-    p You are currently selected to play <b>soldier</b>.
-    img(src='http://cdn.huang.mx/i/wyrHi.png', id='soldier_image',
-        alt='soldier_image')
-  - else if (class_id == 2)
-    p You are currently selected to play <b>medic</b>.
-    img(src='http://cdn.huang.mx/i/nBGRi.png', id='medic_image',
-        alt='medic_image')
-  - else
-    p You are currently <b>not selected to play any class</b>.
-
-  p Your class choice will be locked in on <b>[put a date here]</b>.
-  p Teams will be assigned on <b>[put another date here]</b>.
-  p: a(href='/logout') Logout
+p Your class choice will be locked in on <b>[put a date here]</b>.
+p Teams will be assigned on <b>[put another date here]</b>.
+p: a(href='/logout') Logout

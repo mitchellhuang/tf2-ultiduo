@@ -86,6 +86,21 @@ app.param('class_id', function(req, res, next, id) {
     next(new Error('Invalid class id: ' + id));
 });
 
+// Middleware for pages that require a login
+function require_login(req, res, next) {
+  // If we're already logged in, show the page:
+  if (req.session.player)
+    return next();
+
+  var realm = 'http://' + req.headers.host
+    , return_to = realm + '/verify?returnto=' + req.url;
+  var steam_login = steam.genURL(return_to, realm);
+
+  res.render('login', {
+    steam_url: steam_login
+  });
+}
+
 // Routes
 app.get('/', function(req, res) {
   res.render('index', {
@@ -105,34 +120,25 @@ app.get('/credits', function(req, res) {
   res.render('credits');
 });
 
-app.get('/signup', function(req, res) {
-  if (req.session.player) {
+app.get('/signup', require_login, function(req, res) {
+  // ?full=:class_id parameter, to show when someone tried to change to
+  // a class that is full
+  var full_class = +req.query.full;
+  if (full_class === 1 || full_class === 2) {
+    res.local('full_class', true);
+    res.local('full_class_name', full_class === 1? "soldier" : "medic");
+  } else
+    res.local('full_class', false);
 
-    // ?full=:class_id parameter, to show when someone tried to change to
-    // a class that is full
-    var full_class = +req.query.full;
-    if (full_class === 1 || full_class === 2) {
-      res.local('full_class', true);
-      res.local('full_class_name', full_class === 1? "soldier" : "medic");
-    } else
-      res.local('full_class', false);
+  res.render('signup', {
+    player: req.session.player,
+    steamid: req.session.steamid,
+    class_id: req.session.class_id,
 
-    res.render('signup', {
-      player: req.session.player,
-      steamid: req.session.steamid,
-      class_id: req.session.class_id,
-
-      count_solly: class_counts[1],
-      count_med: class_counts[2],
-      class_limit: config.max_players_per_class
-    });
-  } else {
-    var steam_login = steam.genURL('http://' + req.headers.host + '/verify',
-                                   'http://' + req.headers.host);
-    res.render('signup', {
-      steam_url: steam_login
-    });
-  }
+    count_solly: class_counts[1],
+    count_med: class_counts[2],
+    class_limit: config.max_players_per_class
+  });
 });
 
 // Page to choose to play soldier (1) or Medic (2)
@@ -172,6 +178,8 @@ app.get('/players', function(req, res) {
   });
 });
 
+
+
 // Login via Steam
 app.get('/verify', steam.verify, function(req, res) {
   console.log('User logged in: ' + req.steamid);
@@ -199,7 +207,7 @@ app.get('/verify', steam.verify, function(req, res) {
             else
               req.session.class_id = row.class_id;
           }
-          res.redirect('/signup');
+          res.redirect(req.query['returnto'] || '/');
         });
 
       } else {
