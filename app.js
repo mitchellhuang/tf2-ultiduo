@@ -113,6 +113,10 @@ app.get('/rules', function(req, res) {
   res.render('rules');
 });
 
+app.get('/bracket', function(req, res) {
+  res.render('bracket');
+});
+
 app.get('/time', function(req, res) {
   res.render('time');
 });

@@ -32,14 +32,14 @@ else:
 	random.shuffle(medics)
 	print medics
 
-	cursor.execute('DROP TABLE IF EXISTS teams')
-	cursor.execute('CREATE TABLE teams (id INTEGER, soldier_id TEXT, medic_id TEXT)')
+	cursor.execute('DROP TABLE IF EXISTS team1')
+	cursor.execute('CREATE TABLE team1 (id INTEGER, soldier_id TEXT, medic_id TEXT)')
 	
 	# insert shuffled data into teams.sqlite DB
 	print "Inserting data to new database..."
 	for n in range(totalplayers/2):
 		id = n + 1
-		cursor.execute("INSERT INTO teams VALUES (?, ?, ?)", (id, soldiers[n], medics[n]))
+		cursor.execute("INSERT INTO team1 VALUES (?, ?, ?)", (id, soldiers[n], medics[n]))
 		connection.commit()
 
 	# close db connections
