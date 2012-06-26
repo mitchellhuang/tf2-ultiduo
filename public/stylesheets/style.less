@@ -1,3 +1,6 @@
+@content-background-color: #FCFCFA;
+
+
 * {
   margin: 0;
   padding: 0;
@@ -38,15 +41,11 @@ img { border: none; }
 
 nav {
   float: left;
-  width: 65px;
+  width: 90px;
   font-size: 20px;
 
   li {
-    margin: 1em 0;
-
-    &:first-child {
-      margin: 0;
-    }
+    padding-bottom: 1em;
   }
 }
 
@@ -54,7 +53,7 @@ nav {
   float: right;
   width: 670px;
   padding: 5px 20px 20px 20px;
-  background: #FCFCFA;
+  background: @content-background-color;
 
   h2 {
     margin: 0.83em 0;
