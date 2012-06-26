@@ -9,19 +9,14 @@ html
   body
     #wrapper
       #banner
-      #sidebar
-        a(href='/') Home
-        p
-          a(href='/signup') Register
-        p
-          a(href='/players') Players
-        p
-          a(href='/bracket') Bracket
-        p
-          a(href='/rules') Rules
-        p
-          a(href='/time') Time
-        p
-          a(href='/credits') Credits
+      nav
+        ul
+          li: a(href='/') Home
+          li: a(href='/signup') Register
+          li: a(href='/players') Players
+          li: a(href='/bracket') Bracket
+          li: a(href='/rules') Rules
+          li: a(href='/time') Time
+          li: a(href='/credits') Credits
       #main
         !=body

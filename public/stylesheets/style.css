@@ -1,0 +1,74 @@
+* {
+  margin: 0;
+  padding: 0;
+}
+body {
+  font: 14px Helvetica, Arial, sans-serif;
+  background-image: url('http://cdn.huang.mx/i/ZRck4.jpg');
+}
+a {
+  color: #F14E32;
+}
+/* Stupid IE */
+img {
+  border: none;
+}
+#banner {
+  width: 800px;
+  height: 125px;
+  background-image: url('http://cdn.huang.mx/i/kJRjW.png');
+  margin-bottom: 10px;
+}
+#wrapper {
+  width: 800px;
+  height: 100%;
+  margin: 0px auto;
+  margin-top: 8px;
+  text-align: left;
+  font-size: 15px;
+  overflow: hidden;
+}
+#wrapper h1 {
+  font-size: 26px;
+}
+nav {
+  float: left;
+  width: 65px;
+  font-size: 20px;
+}
+nav li {
+  margin: 1em 0;
+}
+nav li:first-child {
+  margin: 0;
+}
+#main {
+  float: right;
+  width: 670px;
+  padding: 5px 20px 20px 20px;
+  background: #FCFCFA;
+}
+#main h2 {
+  margin: 0.83em 0;
+}
+#main p {
+  margin: 1em 0;
+}
+#main ul {
+  padding-left: 40px;
+}
+table.players {
+  width: 100%;
+}
+#sidebar hr {
+  border: 0;
+  height: 8px;
+  color: #FFFFFF;
+  background-color: #FFFFFF;
+}
+#time_is_link {
+  display: none;
+}
+#full_class {
+  color: red;
+}
