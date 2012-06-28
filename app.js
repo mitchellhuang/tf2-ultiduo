@@ -29,21 +29,44 @@ var steam_api = new steam_data({ apiKey: config.steam_api_key,
 // exist
 var db = new sqlite.Database(config.db_file);
 
-db.run('CREATE TABLE IF NOT EXISTS "PLAYERS"                        \
+// running tallies of number of players who have selected:
+// soldier or medic respectively. These are loaded once and kept
+// in memory so we don't have to query the db every time
+var class_counts = [, 0, 0];
+
+function createPlayersTable(callback) {
+  db.run('CREATE TABLE IF NOT EXISTS "PLAYERS"                      \
 (                                                                   \
- "id" INTEGER PRIMARY KEY  AUTOINCREMENT NOT NULL ,                 \
+ "id" INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL UNIQUE,            \
  "name" TEXT NOT NULL check(typeof("name") = "text"),               \
  "steamid" TEXT NOT NULL UNIQUE check(typeof("steamid") = "text"),  \
- "class_id" INTEGER NOT NULL DEFAULT (0)                            \
-)');
+ "class_id" INTEGER NOT NULL DEFAULT (0),                           \
+ "team_id" INTEGER NOT NULL DEFAULT (0)                             \
+)', function(err) {
+    if (err) callback(err);
+    callback(null);
+  });
+}
 
-var class_counts = [0, 0, 0];
+function createTeamsTable(callback) {
+  db.run('CREATE TABLE IF NOT EXISTS "TEAMS"                        \
+(                                                                   \
+ "id" INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL ,                  \
+ "soldier_id" INTEGER,                                              \
+ "medic_id" INTEGER                                                 \
+)', function(err) {
+    if (err) callback(err);
+    callback(null);
+  });
+}
 
 function loadClassCounts(callback) {
   db.get('SELECT                                                    \
 (SELECT COUNT(*) FROM [PLAYERS] WHERE class_id=1) as count_solly,   \
 (SELECT COUNT(*) FROM [PLAYERS] WHERE class_id=2) as count_med',
          function(err, row) {
+           if (err) callback(err);
+           if (row === undefined) callback(new Error("No results returned"));
            class_counts[1] = row.count_solly;
            class_counts[2] = row.count_med;
 
@@ -220,9 +243,11 @@ app.get('/logout', function(req, res) {
 // Tasks to run before starting the server:
 async.parallel([
   loadClassCounts
+, createPlayersTable
+, createTeamsTable
 ], function(err) {
   if (err) {
-    console.log("Error starting ultiduo server:\n" + err);
+    console.log("Error starting ultiduo server:\n  " + err);
     return;
   }
 
