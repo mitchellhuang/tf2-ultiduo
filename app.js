@@ -220,7 +220,7 @@ app.get('/verify', steam.verify, function(req, res) {
       if (!err && data && data.response && data.response.players[0]) {
         req.session.player = data.response.players[0].personaname;
 
-        db.run("INSERT OR IGNORE INTO PLAYERS ('name','steamid') \
+        db.run("INSERT OR REPLACE INTO PLAYERS ('name','steamid') \
                                        VALUES (?1,?2)",
                req.session.player, req.session.steamid);
 
