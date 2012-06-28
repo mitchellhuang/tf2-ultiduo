@@ -60,6 +60,18 @@ function createTeamsTable(callback) {
   });
 }
 
+function addMatchTable(callback) {
+  db.run('CREATE TABLE IF NOT EXISTS "MATCHES"                      \
+(                                                                   \
+ "id" INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL ,                  \
+ "team1_id" INTEGER,                                              \
+ "team2_id" INTEGER                                                 \
+)', function(err) {
+    if (err) callback(err);
+    callback(null);
+  });
+}
+
 function loadClassCounts(callback) {
   db.get('SELECT                                                    \
 (SELECT COUNT(*) FROM [PLAYERS] WHERE class_id=1) as count_solly,   \
