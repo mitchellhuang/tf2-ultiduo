@@ -253,7 +253,7 @@ app.get('/logout', function(req, res) {
 });
 
 // Tasks to run before starting the server:
-async.parallel([
+async.series([
   loadClassCounts
 , createPlayersTable
 , createTeamsTable
