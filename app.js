@@ -258,9 +258,9 @@ app.get('/logout', function(req, res) {
 
 // Tasks to run before starting the server:
 async.series([
-  loadClassCounts
-, createPlayersTable
+  createPlayersTable
 , createTeamsTable
+, loadClassCounts
 ], function(err) {
   if (err) {
     console.log("Error starting ultiduo server:\n  " + err);
