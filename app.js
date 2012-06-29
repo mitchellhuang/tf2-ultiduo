@@ -166,25 +166,32 @@ app.get('/credits', function(req, res) {
   res.render('credits');
 });
 
-app.get('/signup/:class_id?/:csrf?', require_login, function(req, res) {
+// /:csrf?
+app.get('/signup/:class_id?', require_login, function(req, res) {
   res.local('full_class', false);
-  if (req.params.class_id && req.params.csrf === req.session._csrf) {
+  if (req.params.class_id || req.params.class_id === 0) {
+    //&& req.params.csrf === req.session._csrf) {
     var class_id = +req.params.class_id;
 
-    // Check that there is an available slot for the selected class:
-    if (class_counts[class_id] < config.max_players_per_class) {
-      db.run("UPDATE players SET class_id = $cid WHERE steamid = $sid", {
-        $cid: "" + class_id,
-        $sid: req.session.steamid
-      });
-
+    if (class_id === 0) {
       class_counts[req.session.class_id]--;
-      class_counts[class_id]++;
-
-      req.session.class_id = class_id;
+      req.session.class_id = 0;
     } else {
-      res.local('full_class', true);
-      res.local('full_class_name', class_id === 1? "soldier" : "medic");
+      // Check that there is an available slot for the selected class:
+      if (class_counts[class_id] < config.max_players_per_class) {
+        db.run("UPDATE players SET class_id = $cid WHERE steamid = $sid", {
+          $cid: "" + class_id,
+          $sid: req.session.steamid
+        });
+
+        class_counts[req.session.class_id]--;
+        class_counts[class_id]++;
+
+        req.session.class_id = class_id;
+      } else {
+        res.local('full_class', true);
+        res.local('full_class_name', class_id === 1? "soldier" : "medic");
+      }
     }
   }
 
@@ -193,7 +200,7 @@ app.get('/signup/:class_id?/:csrf?', require_login, function(req, res) {
     steamid: req.session.steamid,
     class_id: req.session.class_id,
 
-    csrf: encodeURIComponent(req.session._csrf),
+//    csrf: encodeURIComponent(req.session._csrf),
 
     count_solly: class_counts[1],
     count_med: class_counts[2],
