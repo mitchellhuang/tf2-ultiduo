@@ -79,7 +79,7 @@ function loadClassCounts(callback) {
          function(err, row) {
            if (err) callback(err);
 //           if (row === undefined) callback(new Error("No results returned"));
-           if (row === undefined || !row.count_solly) {
+           if (row === undefined || !row || !row.count_solly) {
              console.log("No players!");
              callback(null);
            }
