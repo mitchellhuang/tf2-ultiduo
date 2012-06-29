@@ -78,7 +78,11 @@ function loadClassCounts(callback) {
 (SELECT COUNT(*) FROM [PLAYERS] WHERE class_id=2) as count_med',
          function(err, row) {
            if (err) callback(err);
-           if (row === undefined) callback(new Error("No results returned"));
+//           if (row === undefined) callback(new Error("No results returned"));
+           if (row === undefined || !row.count_solly) {
+             console.log("No players!");
+             callback(null);
+           }
            class_counts[1] = row.count_solly;
            class_counts[2] = row.count_med;
 
