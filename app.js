@@ -79,7 +79,7 @@ function loadClassCounts(callback) {
          function(err, row) {
            if (err) callback(err);
 //           if (row === undefined) callback(new Error("No results returned"));
-           if (row === undefined || !row || !row.count_solly) {
+           if (row === undefined || !row) {
              console.log("No players!");
              callback(null);
              return;
@@ -174,6 +174,10 @@ app.get('/signup/:class_id?', require_login, function(req, res) {
     var class_id = +req.params.class_id;
 
     if (class_id === 0) {
+      db.run("UPDATE players SET class_id = $cid WHERE steamid = $sid", {
+        $cid: "" + class_id,
+        $sid: req.session.steamid+""
+      });
       class_counts[req.session.class_id]--;
       req.session.class_id = 0;
     } else {
@@ -181,9 +185,8 @@ app.get('/signup/:class_id?', require_login, function(req, res) {
       if (class_counts[class_id] < config.max_players_per_class) {
         db.run("UPDATE players SET class_id = $cid WHERE steamid = $sid", {
           $cid: "" + class_id,
-          $sid: req.session.steamid
+          $sid: req.session.steamid+""
         });
-
         class_counts[req.session.class_id]--;
         class_counts[class_id]++;
 
@@ -232,20 +235,28 @@ app.get('/verify', steam.verify, function(req, res) {
       if (!err && data && data.response && data.response.players[0]) {
         req.session.player = data.response.players[0].personaname;
 
-        db.run("INSERT OR REPLACE INTO PLAYERS ('name','steamid') \
+        db.serialize(function() {
+        db.run("INSERT OR IGNORE INTO PLAYERS ('name','steamid') \
                                        VALUES (?1,?2)",
-               req.session.player, req.session.steamid);
+               req.session.player, req.session.steamid+"");
 
+        db.run("UPDATE PLAYERS SET name = ?1 WHERE steamid = ?2",
+               req.session.player, req.session.steamid+"");
+        });
+
+        console.log(req.session.steamid);
         db.get("SELECT class_id FROM players WHERE steamid = $sid", {
-          $sid: req.session.steamid
+          $sid: req.session.steamid+""
         }, function(err, row) {
           if (err) {
             console.log('DB Err: ' + err);
             req.session.class_id = 0;
           } else {
-            if (typeof row === "undefined")
+            console.log(row);
+            if (typeof row === "undefined") {
+              console.log("WTF");
               req.session.class_id = 0;
-            else
+            } else
               req.session.class_id = row.class_id;
           }
           res.redirect(req.query['returnto'] || '/');
