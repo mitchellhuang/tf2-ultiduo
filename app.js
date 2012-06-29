@@ -82,6 +82,7 @@ function loadClassCounts(callback) {
            if (row === undefined || !row || !row.count_solly) {
              console.log("No players!");
              callback(null);
+             return;
            }
            class_counts[1] = row.count_solly;
            class_counts[2] = row.count_med;
