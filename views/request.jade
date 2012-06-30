@@ -1,0 +1,22 @@
+h2 Create a team
+
+p Note: Only 1 invite player allowed per team. 
+p You must be already registered in the tournament to create a team.
+
+form(method='post', action='/request_post')
+  p
+    label
+      | <b>Soldier</b> SteamID: 
+      input(type='text', name='player[0]')
+  p
+    label
+      | <b>Medic</b> SteamID: 
+      input(type='text',name='player[1]')
+
+  input(type='submit', value='Submit')
+
+p SteamID's can be found on the 
+  a(href="/players") players
+  | &nbsp;page.
+
+p If you do not create a team, you will be randomly assigned a teammate.

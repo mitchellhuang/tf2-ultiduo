@@ -72,6 +72,18 @@ function addMatchTable(callback) {
   });
 }
 
+function addReqTeamsTable(callback) {
+  db.run('CREATE TABLE IF NOT EXISTS "REQTEAMS"                      \
+(                                                                   \
+ "id" INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL ,                  \
+ "soldier_id" INTEGER,                                              \
+ "medic_id" INTEGER                                                 \
+)', function(err) {
+    if (err) callback(err);
+    callback(null);
+  });
+}
+
 function loadClassCounts(callback) {
   db.get('SELECT                                                    \
 (SELECT COUNT(*) FROM [PLAYERS] WHERE class_id=1) as count_solly,   \
@@ -105,7 +117,7 @@ app.configure(function(){
                           // Cookies expire in 5 days (or when server restarts)
                           , cookie: { m02axAge: 5 * 24 * 60 * 60 * 1000 } }));
   app.use(express.compiler({ src: pubdir, enable: ['less']}));
-  app.use(connect.csrf());
+  //app.use(connect.csrf());
   app.use(app.router);
   app.use(express.static(pubdir));
 });
@@ -164,6 +176,54 @@ app.get('/time', function(req, res) {
 
 app.get('/credits', function(req, res) {
   res.render('credits');
+});
+
+app.get('/request', function(req, res) {
+  res.render('request');
+});
+
+app.post('/request_post', function(req, res) {
+    var p1;
+    var p2;
+    db.all("SELECT COUNT(*) FROM players WHERE steamid=$id1", {
+            $id1: req.body.player[0]+""
+          },
+           function(err, rows) {
+              if (err) {
+                res.redirect('request', {
+                  error: 'An error occured.'
+                });
+              }
+      p1 = rows[0]['COUNT(*)'];
+    });
+    db.all("SELECT COUNT(*) FROM players WHERE steamid=$id2", {
+            $id2: req.body.player[1]+""
+          },
+           function(err, rows) {
+              if (err) {
+                res.redirect('request', {
+                  error: 'An error occured.'
+                });
+              }
+      var p2 = rows[0]['COUNT(*)'];
+
+      if (req.body.player[0] == req.body.player[1]) {
+        res.writeHead(200);
+        res.end("Error, you entered 2 identical SteamIDs.");
+      }
+      else {
+        if ((p1+p2) != 2) {
+        res.writeHead(200);
+        res.end("Error, you didn't enter 2 registered SteamIDs.");          
+        }
+        else {
+        db.run("INSERT OR IGNORE INTO REQTEAMS ('soldier_id','medic_id') \
+                                       VALUES (?1,?2)",
+            req.body.player[0], req.body.player[1]+"");
+            res.redirect('/request');
+        }
+      }
+    });
 });
 
 // /:csrf?
@@ -280,6 +340,7 @@ async.series([
   createPlayersTable
 , createTeamsTable
 , loadClassCounts
+, addReqTeamsTable
 ], function(err) {
   if (err) {
     console.log("Error starting ultiduo server:\n  " + err);
