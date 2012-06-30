@@ -31,6 +31,24 @@ p: a(href='/signup/0/') Remove from tournament
 - else
   p You are currently <b>not selected to play any class</b>.
 
+br
+
+h2 Choose Teammate
+form
+  label(for='teammate')
+    | Enter a steamid or name from the&nbsp;
+    a(href='/players') players list
+  br
+  input(type='text', id='teammate')
+  input(type='submit', value='Register teammate')
+
+h2 Teammate staus
+- if (teammate)
+  p Current teammate: #{teammate}
+- else
+  p No teammate selected
+
+h2 Dates
 p Your class choice will be locked in on <b>Sunday, July 1st @ 12:00 EST</b>.
 p Teams will be assigned on <b>Monday, July 2nd</b>.
 p: a(href='/logout') Logout

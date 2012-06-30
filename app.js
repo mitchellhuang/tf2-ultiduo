@@ -34,6 +34,10 @@ var db = new sqlite.Database(config.db_file);
 // in memory so we don't have to query the db every time
 var class_counts = [, 0, 0];
 
+// team_id will first be 'teammate id' for now, and will point to the
+// team once team's are finished :p This is pretty terrible design, but
+// for now it avoids risking messing up the database (and I don't trust
+// sqlite as it is)
 function createPlayersTable(callback) {
   db.run('CREATE TABLE IF NOT EXISTS "PLAYERS"                      \
 (                                                                   \
@@ -228,7 +232,11 @@ app.post('/request_post', function(req, res) {
 
 // /:csrf?
 app.get('/signup/:class_id?', require_login, function(req, res) {
+  // 'Optional' flags for rendering optional results
+  // These can't be left undefined or jade complains
   res.local('full_class', false);
+  res.local('teammate', false);
+
   if (req.params.class_id || req.params.class_id === 0) {
     //&& req.params.csrf === req.session._csrf) {
     var class_id = +req.params.class_id;
