@@ -51,7 +51,7 @@ function createPlayersTable(callback) {
 function createTeamsTable(callback) {
   db.run('CREATE TABLE IF NOT EXISTS "TEAMS"                        \
 (                                                                   \
- "id" INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL ,                  \
+ "id" INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,                   \
  "soldier_id" INTEGER,                                              \
  "medic_id" INTEGER                                                 \
 )', function(err) {
@@ -60,11 +60,11 @@ function createTeamsTable(callback) {
   });
 }
 
-function addMatchTable(callback) {
+function createMatchTable(callback) {
   db.run('CREATE TABLE IF NOT EXISTS "MATCHES"                      \
 (                                                                   \
- "id" INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL ,                  \
- "team1_id" INTEGER,                                              \
+ "id" INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,                   \
+ "team1_id" INTEGER,                                                \
  "team2_id" INTEGER                                                 \
 )', function(err) {
     if (err) callback(err);
@@ -72,10 +72,10 @@ function addMatchTable(callback) {
   });
 }
 
-function addReqTeamsTable(callback) {
-  db.run('CREATE TABLE IF NOT EXISTS "REQTEAMS"                      \
+function createReqTeamsTable(callback) {
+  db.run('CREATE TABLE IF NOT EXISTS "REQTEAMS"                     \
 (                                                                   \
- "id" INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL ,                  \
+ "id" INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,                   \
  "soldier_id" INTEGER,                                              \
  "medic_id" INTEGER                                                 \
 )', function(err) {
@@ -214,7 +214,7 @@ app.post('/request_post', function(req, res) {
       else {
         if ((p1+p2) != 2) {
         res.writeHead(200);
-        res.end("Error, you didn't enter 2 registered SteamIDs.");          
+        res.end("Error, you didn't enter 2 registered SteamIDs.");
         }
         else {
         db.run("INSERT OR IGNORE INTO REQTEAMS ('soldier_id','medic_id') \
@@ -339,8 +339,9 @@ app.get('/logout', function(req, res) {
 async.series([
   createPlayersTable
 , createTeamsTable
+, createMatchTable
+, createReqTeamsTable
 , loadClassCounts
-, addReqTeamsTable
 ], function(err) {
   if (err) {
     console.log("Error starting ultiduo server:\n  " + err);
