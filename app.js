@@ -231,7 +231,7 @@ app.post('/request_post', function(req, res) {
 });
 
 // /:csrf?
-app.get('/signup/:class_id?', require_login, function(req, res) {
+app.all('/signup/:class_id?', require_login, function(req, res) {
   // 'Optional' flags for rendering optional results
   // These can't be left undefined or jade complains
   res.local('full_class', false);
@@ -264,6 +264,13 @@ app.get('/signup/:class_id?', require_login, function(req, res) {
         res.local('full_class_name', class_id === 1? "soldier" : "medic");
       }
     }
+  }
+
+  // Handle a POST'd teammate field:
+  if (req.body.teammate) {
+    var teammate = req.body.teammate;
+    //find_teammate(teammate);
+
   }
 
   res.render('signup', {
