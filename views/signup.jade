@@ -34,12 +34,12 @@ p: a(href='/signup/0/') Remove from tournament
 br
 
 h2 Choose Teammate
-form
+form(method='post', action='/signup')
   label(for='teammate')
     | Enter a steamid or name from the&nbsp;
     a(href='/players') players list
   br
-  input(type='text', id='teammate')
+  input(type='text', name='teammate', id='teammate')
   input(type='submit', value='Register teammate')
 
 h2 Teammate staus
@@ -49,6 +49,9 @@ h2 Teammate staus
   p No teammate selected
 
 h2 Dates
-p Your class choice will be locked in on <b>Sunday, July 1st @ 12:00 EST</b>.
-p Teams will be assigned on <b>Monday, July 2nd</b>.
+p
+  | Your class choice will be locked in on
+  b  Wednesday, July 4 at 12:00 PM EST
+  | .
+p Teams will be assigned on <b>Thursday, July 4</b>.
 p: a(href='/logout') Logout
