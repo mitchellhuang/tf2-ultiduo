@@ -19,4 +19,6 @@ html
           li: a(href='/time') Time
           li: a(href='/credits') Credits
       #main
+        - if (error)
+          p.error!= error
         !=body
