@@ -39,10 +39,16 @@ p: a(href='/signup/0') Remove from tournament
   h2 Choose Teammate
   form(method='post', action='/signup')
     label(for='teammate')
-      | Enter a steamid or name from the&nbsp;
-      a(href='/players') players list
+      | Select a&nbsp;
+      - if (teammate_class_id == 1)
+        b Soldier
+      - else
+        b Medic
+      |  from the list:
     br
-    input(type='text', name='teammate', id='teammate')
+    select(name='teammate')
+      - each teammate in teammates
+        option(value= teammate.id) #{teammate.name} [#{teammate.steamid}]
     input(type='submit', value='Register teammate')
 
   h2 Teammate staus
