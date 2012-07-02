@@ -53,7 +53,17 @@ p: a(href='/signup/0') Remove from tournament
 
   h2 Teammate staus
   - if (teammate)
-    p Current teammate: #{teammate}
+    p Current teammate: #{teammate.name}
+    - if (teammate.team_id != player_id)
+      p.error
+        | Your teammate
+        b  HAS NOT
+        |  specified you as their teammate.
+    - if (teammate.class_id == 0 || teammate.class_id == 3)
+      p.error
+        | Your teammate
+        b  IS NOT
+        |  registered to play as a soldier or medic!
   - else
     p No teammate selected
 
