@@ -32,7 +32,7 @@ var db = new sqlite.Database(config.db_file);
 // running tallies of number of players who have selected:
 // soldier or medic respectively. These are loaded once and kept
 // in memory so we don't have to query the db every time
-var class_counts = [, 0, 0];
+var class_counts = [, 0, 0, 0];
 
 // team_id will first be 'teammate id' for now, and will point to the
 // team once team's are finished :p This is pretty terrible design, but
@@ -126,6 +126,11 @@ app.configure(function(){
   app.use(express.static(pubdir));
 });
 
+//
+app.helpers({
+  error: false
+});
+
 app.configure('development', function(){
   app.use(express.errorHandler({ dumpExceptions: true, showStack: true }));
   app.use(express.logger());
@@ -137,8 +142,12 @@ app.configure('production', function(){
 
 // Parameter Pre-conditions
 app.param('class_id', function(req, res, next, id) {
+  // 0 => Not playing
+  // 1    Soldier
+  // 2    Medic
+  // 3    Backup
   var id = +id;
-  if (id >= 0 && id <= 2)
+  if (id >= 0 && id <= 3)
     next();
   else
     next(new Error('Invalid class id: ' + id));
@@ -161,9 +170,7 @@ function require_login(req, res, next) {
 
 // Routes
 app.get('/', function(req, res) {
-  res.render('index', {
-    steam_login: 'signup'
-  });
+  res.render('index');
 });
 
 app.get('/rules', function(req, res) {
@@ -186,68 +193,52 @@ app.get('/request', function(req, res) {
   res.render('request');
 });
 
-app.post('/request_post', function(req, res) {
-    var p1;
-    var p2;
-    db.all("SELECT COUNT(*) FROM players WHERE steamid=$id1", {
-            $id1: req.body.player[0]+""
-          },
-           function(err, rows) {
-              if (err) {
-                res.redirect('request', {
-                  error: 'An error occured.'
-                });
-              }
-      p1 = rows[0]['COUNT(*)'];
-    });
-    db.all("SELECT COUNT(*) FROM players WHERE steamid=$id2", {
-            $id2: req.body.player[1]+""
-          },
-           function(err, rows) {
-              if (err) {
-                res.redirect('request', {
-                  error: 'An error occured.'
-                });
-              }
-      var p2 = rows[0]['COUNT(*)'];
-
-      if (req.body.player[0] == req.body.player[1]) {
-        res.writeHead(200);
-        res.end("Error, you entered 2 identical SteamIDs.");
-      }
-      else {
-        if ((p1+p2) != 2) {
-        res.writeHead(200);
-        res.end("Error, you didn't enter 2 registered SteamIDs.");
-        }
-        else {
-        db.run("INSERT OR IGNORE INTO REQTEAMS ('soldier_id','medic_id') \
-                                       VALUES (?1,?2)",
-            req.body.player[0], req.body.player[1]+"");
-            res.redirect('/request');
-        }
-      }
-    });
-});
-
 // /:csrf?
 app.all('/signup/:class_id?', require_login, function(req, res) {
   // 'Optional' flags for rendering optional results
   // These can't be left undefined or jade complains
   res.local('full_class', false);
   res.local('teammate', false);
+  res.local('teammate_class_id', false)
+
+  // A list of tasks to do asynchronously before we render the page
+  // this should be used for more stuff once I have time to clean this up
+  var thingsToDo = [];
 
   if (req.params.class_id || req.params.class_id === 0) {
     //&& req.params.csrf === req.session._csrf) {
     var class_id = +req.params.class_id;
 
     if (class_id === 0) {
-      db.run("UPDATE players SET class_id = $cid WHERE steamid = $sid", {
-        $cid: "" + class_id,
-        $sid: req.session.steamid+""
+      thingsToDo.push(function(callback) {
+        db.run("UPDATE players SET class_id = 0 WHERE steamid = $sid", {
+          $sid: req.session.steamid+""
+        }, function(err, row) {
+          if (err) {
+            console.log('Error removing player from tournament: ' + err);
+            return callback(err);
+          }
+
+          class_counts[req.session.class_id]--;
+          req.session.class_id = 0;
+          callback(null);
+        });
       });
-      class_counts[req.session.class_id]--;
-      req.session.class_id = 0;
+    } else if (class_id === 3) {
+      thingsToDo.push(function(callback) {
+        db.run("UPDATE players SET class_id = 3 WHERE steamid = $sid", {
+          $sid: req.session.steamid+""
+        }, function(err, row) {
+          if (err) {
+            console.log('Error making player a backup: ' + err);
+            return callback(err);
+          }
+
+          class_counts[req.session.class_id]--;
+          req.session.class_id = 3;
+          callback(null);
+        });
+      });
     } else {
       // Check that there is an available slot for the selected class:
       if (class_counts[class_id] < config.max_players_per_class) {
@@ -267,23 +258,73 @@ app.all('/signup/:class_id?', require_login, function(req, res) {
   }
 
   // Handle a POST'd teammate field:
-  if (req.body.teammate) {
-    var teammate = req.body.teammate;
-    //find_teammate(teammate);
-
+  if (req.body.teammate && /^\d+$/.test(req.body.teammate)) {
+/*    thingsToDo.push(function(callback) {
+      db.get('SELECT * FROM players WHERE id = ?1 AND class_id = ?2',
+             req.session.team_id, teammate_class_id,
+             function(err, row) {
+               if (err) return callback(err);
+               res.local('teammate', row);
+               callback(null);
+             });
+             }); */
+    // TODO: Should actually do some validation checks here
+    // (aside from the above number verification)
+    req.session.team_id = +req.body.teammate;
+    db.run("UPDATE PLAYERS SET team_id = ?1 WHERE steamid = ?2",
+           req.body.teammate, req.session.steamid+"");
   }
 
-  res.render('signup', {
-    player: req.session.player,
-    steamid: req.session.steamid,
-    class_id: req.session.class_id,
+  var teammate_class_id = null;
+  if (req.session.class_id === 1 || req.session.class_id === 2) {
+    // Show players registered as the other class
+    teammate_class_id = (req.session.class_id === 1)? 2:1;
+    res.local('teammate_class_id', teammate_class_id);
 
-//    csrf: encodeURIComponent(req.session._csrf),
+    // Get teammate info.  This should be stored in memory with the session
+    // but I am tooooo lazy
+    // (This also lets us check if they are mutual teammates)
+    if (req.session.team_id) {
+      thingsToDo.push(function(callback) {
+        db.get('SELECT * FROM players WHERE id = ?1',
+               req.session.team_id,
+               function(err, row) {
+                 if (err) return callback(err);
+                 res.local('teammate', row);
+                 callback(null);
+               });
+      });
+    }
 
-    count_solly: class_counts[1],
-    count_med: class_counts[2],
-    class_limit: config.max_players_per_class
+    thingsToDo.push(function(callback) {
+      db.all('SELECT id, name, steamid FROM players WHERE class_id = ?',
+             teammate_class_id,
+             function(err, rows) {
+        if (err) return callback(err);
+        res.local('teammates', rows);
+        callback(null);
+      });
+    });
+  }
+
+  async.parallel(thingsToDo, function(err, results) {
+    if (err) {
+      console.log('Signup page error: ' + err);
+      res.local('error', 'Error assigning teammate');
+    }
+
+    res.render('signup', {
+      player: req.session.player,
+      steamid: req.session.steamid,
+      class_id: req.session.class_id,
+      player_id: req.session.player_id,
+
+      count_solly: class_counts[1],
+      count_med: class_counts[2],
+      class_limit: config.max_players_per_class
+    });
   });
+
 });
 
 app.get('/players', function(req, res) {
@@ -311,28 +352,32 @@ app.get('/verify', steam.verify, function(req, res) {
         req.session.player = data.response.players[0].personaname;
 
         db.serialize(function() {
-        db.run("INSERT OR IGNORE INTO PLAYERS ('name','steamid') \
-                                       VALUES (?1,?2)",
-               req.session.player, req.session.steamid+"");
+          db.run("INSERT OR IGNORE INTO PLAYERS ('name','steamid') \
+                                        VALUES (?1,?2)",
+                 req.session.player, req.session.steamid+"");
 
-        db.run("UPDATE PLAYERS SET name = ?1 WHERE steamid = ?2",
-               req.session.player, req.session.steamid+"");
+          db.run("UPDATE PLAYERS SET name = ?1 WHERE steamid = ?2",
+                 req.session.player, req.session.steamid+"");
         });
 
-        console.log(req.session.steamid);
-        db.get("SELECT class_id FROM players WHERE steamid = $sid", {
-          $sid: req.session.steamid+""
-        }, function(err, row) {
+        db.get("SELECT id,class_id, team_id FROM players WHERE steamid = $sid",
+               { $sid: req.session.steamid+""},
+               function(err, row) {
           if (err) {
             console.log('DB Err: ' + err);
+            req.session.player_id = 0;
             req.session.class_id = 0;
+            req.session.team_id = false;
           } else {
-            console.log(row);
             if (typeof row === "undefined") {
-              console.log("WTF");
+              req.session.player_id = 0;
               req.session.class_id = 0;
-            } else
+              req.session.team_id = false;
+            } else {
+              req.session.player_id = row.id;
               req.session.class_id = row.class_id;
+              req.session.team_id = row.team_id;
+            }
           }
           res.redirect(req.query['returnto'] || '/');
         });
@@ -348,6 +393,16 @@ app.get('/verify', steam.verify, function(req, res) {
 app.get('/logout', function(req, res) {
   req.session.destroy();
   res.redirect('/');
+});
+
+// Gracefull shutdown
+process.on('SIGTERM', function () {
+  console.log('Shutting down...');
+  db.close();
+  console.log('Database closed...');
+  app.close();
+  console.log('HTTP Server closed...');
+  process.exit(0);
 });
 
 // Tasks to run before starting the server:
