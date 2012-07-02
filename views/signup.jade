@@ -18,7 +18,9 @@ p
   - else
     a(href='/signup/2') Play Medic
   |  [#{count_med}/#{class_limit}]
-p: a(href='/signup/0/') Remove from tournament
+
+p: a(href='/signup/3') Be a backup player
+p: a(href='/signup/0') Remove from tournament
 
 - if (class_id == 1)
   p You are currently selected to play <b>soldier</b>.
@@ -28,25 +30,26 @@ p: a(href='/signup/0/') Remove from tournament
   p You are currently selected to play <b>medic</b>.
   img(src='http://cdn.huang.mx/i/nBGRi.png', id='medic_image',
       alt='medic_image')
+- else if (class_id == 3)
+  p You are currently selected to play as a <b>backup</b>.
 - else
   p You are currently <b>not selected to play any class</b>.
 
-br
+- if (class_id == 1 || class_id == 2)
+  h2 Choose Teammate
+  form(method='post', action='/signup')
+    label(for='teammate')
+      | Enter a steamid or name from the&nbsp;
+      a(href='/players') players list
+    br
+    input(type='text', name='teammate', id='teammate')
+    input(type='submit', value='Register teammate')
 
-h2 Choose Teammate
-form(method='post', action='/signup')
-  label(for='teammate')
-    | Enter a steamid or name from the&nbsp;
-    a(href='/players') players list
-  br
-  input(type='text', name='teammate', id='teammate')
-  input(type='submit', value='Register teammate')
-
-h2 Teammate staus
-- if (teammate)
-  p Current teammate: #{teammate}
-- else
-  p No teammate selected
+  h2 Teammate staus
+  - if (teammate)
+    p Current teammate: #{teammate}
+  - else
+    p No teammate selected
 
 h2 Dates
 p
