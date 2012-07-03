@@ -14,6 +14,7 @@ var express    = require('express')
   , steam_data = require('steam')
   , steam      = require('./steam.js')
   , async      = require('async')
+  , invite     = require('./invite_players.js')
   , _          = require('underscore');
 
 var app = module.exports = express.createServer();
@@ -395,15 +396,17 @@ app.get('/logout', function(req, res) {
   res.redirect('/');
 });
 
+if (process.platform.indexOf("win") === -1) {
 // Gracefull shutdown
-process.on('SIGTERM', function () {
-  console.log('Shutting down...');
-  db.close();
-  console.log('Database closed...');
-  app.close();
-  console.log('HTTP Server closed...');
-  process.exit(0);
-});
+  process.on('SIGTERM', function () {
+    console.log('Shutting down...');
+    db.close();
+    console.log('Database closed...');
+    app.close();
+    console.log('HTTP Server closed...');
+    process.exit(0);
+  });
+}
 
 // Tasks to run before starting the server:
 async.series([
