@@ -338,10 +338,29 @@ app.get('/players', function(req, res) {
          function(err, rows) {
     if (err) {
       console.log("DB Err: " + err);
+      res.render({
+        error: "Error fetching players"
+      , players: []
+      });
       return;
     }
 
     res.render('players', { players: rows });
+  });
+});
+
+app.get('/teams', function(req, res) {
+  db.all('SELECT * FROM teams', function(err, rows) {
+    if (err) {
+      console.log("Teams: DB Err: " + err);
+      res.render({
+        error: "Error fetching teams"
+      , teams:
+      });
+      return;
+    }
+
+    res.render('teams', { teams: rows });
   });
 });
 
