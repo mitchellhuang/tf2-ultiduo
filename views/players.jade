@@ -8,7 +8,9 @@ table.players
 
   each player in players
     tr
-      td !{player.name}
+      td
+        a(href='http://steamcommunity.com/profile/' + player.steamid)
+          != player.name
       td !{player.steamid}
       td
         - if (player.class_id == 1)
