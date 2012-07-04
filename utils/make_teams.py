@@ -59,10 +59,15 @@ random.shuffle(medics)
 # Combine list of random teams with user specified teams
 teams += zip(soldiers, medics)
 
+if len(teams) != int(sys.argv[2]):
+  print "There are %d teams" % len(teams)
+  if raw_input("There are too few teams, continue? (y/n) ") != 'y':
+    sys.exit(-1)
+
+print "Creating %d teams" % len(teams)
+
 # Write to DB
 cur.executemany(INSERT_TEAM, teams)
-
-print "Create %d teams" % (len(teams))
 
 db.commit()
 cur.close()
