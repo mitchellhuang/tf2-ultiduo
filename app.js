@@ -88,7 +88,7 @@ function createMatchCommsTable(callback) {
  "id" INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,                   \
  "match_id" INTEGER,                                                \
  "message" TEXT,                                                    \
- "post_date" INTEGER,                                               \
+ "post_date" INTEGER                                                \
 )', function(err) {
     if (err) callback(err);
     callback(null);
