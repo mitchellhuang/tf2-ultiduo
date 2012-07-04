@@ -1,13 +1,19 @@
 h2 Teams
 
-table
-  tr
-    th Team Name
-    th Soldier
-      th Medic
-
-  each team in teams
+- if (teams.length === 0)
+  p No teams have been assigned yet!
+- else
+  table
     tr
-      td Match #!{team.id}
-      td !{team.soldier_id}
-      td !{team.medic_id}
+      th Team Name
+      th Soldier
+      th Medic
+    each team in teams
+      tr
+        td Team #!{team.id}
+        td
+          a(href='http://steamcommunity.com/profiles/' + team.soldier_steamid)
+            != team.soldier_name
+        td
+          a(href='http://steamcommunity.com/profiles/' + team.soldier_nameid)
+            != team.medic_name

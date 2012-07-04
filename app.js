@@ -350,7 +350,19 @@ app.get('/players', function(req, res) {
 });
 
 app.get('/teams', function(req, res) {
-  db.all('SELECT * FROM teams', function(err, rows) {
+  db.all("\
+SELECT t.id,                                   \
+       p1.name as soldier_name,                \
+       p1.steamid as soldier_steamid,          \
+       p2.name as medic_name,                  \
+       p2.steamid as medic_steamid,            \
+       (p1.team_id = p2.id) as are_friends     \
+FROM TEAMS t                                   \
+JOIN PLAYERS p1                                \
+ON t.soldier_id = p1.id                        \
+JOIN PLAYERS p2                                \
+ON t.medic_id = p2.id                          \
+", function(err, rows) {
     if (err) {
       console.log("Teams: DB Err: " + err);
       res.render({
