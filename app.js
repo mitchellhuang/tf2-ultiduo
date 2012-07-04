@@ -70,7 +70,25 @@ function createMatchTable(callback) {
 (                                                                   \
  "id" INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,                   \
  "team1_id" INTEGER,                                                \
- "team2_id" INTEGER                                                 \
+ "team2_id" INTEGER,                                                \
+ "round" INTEGER,                                                   \
+ "server_ip" TEXT,                                                  \
+ "server_port" INTEGER,                                             \
+ "team1_score" INTEGER,                                             \
+ "team2_score" INTEGER                                              \
+)', function(err) {
+    if (err) callback(err);
+    callback(null);
+  });
+}
+
+function createMatchCommsTable(callback) {
+  db.run('CREATE TABLE IF NOT EXISTS "MATCHE_COMMS"                 \
+(                                                                   \
+ "id" INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,                   \
+ "match_id" INTEGER,                                                \
+ "message" TEXT,                                                    \
+ "post_date" INTEGER,                                               \
 )', function(err) {
     if (err) callback(err);
     callback(null);
@@ -332,13 +350,17 @@ app.all('/signup/:class_id?', require_login, function(req, res) {
 
 });
 
+app.get('/match', require_login, function(req, res) {
+  res.render('match');
+});
+
 app.get('/players', function(req, res) {
   var players = []
   db.all("SELECT name, class_id, steamid FROM players WHERE class_id != 0",
          function(err, rows) {
     if (err) {
       console.log("DB Err: " + err);
-      res.render({
+      res.render('players', {
         error: "Error fetching players"
       , players: []
       });
@@ -448,6 +470,7 @@ async.series([
   createPlayersTable
 , createTeamsTable
 , createMatchTable
+, createMatchCommsTable
 , createReqTeamsTable
 , loadClassCounts
 ], function(err) {
