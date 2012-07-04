@@ -185,6 +185,10 @@ app.get('/time', function(req, res) {
   res.render('time');
 });
 
+app.get('/admins', function(req, res) {
+  res.render('admins');
+});
+
 app.get('/credits', function(req, res) {
   res.render('credits');
 });
