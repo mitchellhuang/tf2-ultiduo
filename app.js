@@ -355,7 +355,7 @@ app.get('/teams', function(req, res) {
       console.log("Teams: DB Err: " + err);
       res.render({
         error: "Error fetching teams"
-      , teams:
+      , teams: []
       });
       return;
     }
