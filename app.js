@@ -35,78 +35,6 @@ var db = new sqlite.Database(config.db_file);
 // in memory so we don't have to query the db every time
 var class_counts = [, 0, 0, 0];
 
-// team_id will first be 'teammate id' for now, and will point to the
-// team once team's are finished :p This is pretty terrible design, but
-// for now it avoids risking messing up the database (and I don't trust
-// sqlite as it is)
-function createPlayersTable(callback) {
-  db.run('CREATE TABLE IF NOT EXISTS "PLAYERS"                      \
-(                                                                   \
- "id" INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL UNIQUE,            \
- "name" TEXT NOT NULL check(typeof("name") = "text"),               \
- "steamid" TEXT NOT NULL UNIQUE check(typeof("steamid") = "text"),  \
- "class_id" INTEGER NOT NULL DEFAULT (0),                           \
- "team_id" INTEGER NOT NULL DEFAULT (0)                             \
-)', function(err) {
-    if (err) callback(err);
-    callback(null);
-  });
-}
-
-function createTeamsTable(callback) {
-  db.run('CREATE TABLE IF NOT EXISTS "TEAMS"                        \
-(                                                                   \
- "id" INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,                   \
- "soldier_id" INTEGER,                                              \
- "medic_id" INTEGER                                                 \
-)', function(err) {
-    if (err) callback(err);
-    callback(null);
-  });
-}
-
-function createMatchTable(callback) {
-  db.run('CREATE TABLE IF NOT EXISTS "MATCHES"                      \
-(                                                                   \
- "id" INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,                   \
- "team1_id" INTEGER,                                                \
- "team2_id" INTEGER,                                                \
- "round" INTEGER,                                                   \
- "server_ip" TEXT,                                                  \
- "server_port" INTEGER,                                             \
- "team1_score" INTEGER,                                             \
- "team2_score" INTEGER                                              \
-)', function(err) {
-    if (err) callback(err);
-    callback(null);
-  });
-}
-
-function createMatchCommsTable(callback) {
-  db.run('CREATE TABLE IF NOT EXISTS "MATCHE_COMMS"                 \
-(                                                                   \
- "id" INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,                   \
- "match_id" INTEGER,                                                \
- "message" TEXT,                                                    \
- "post_date" INTEGER                                                \
-)', function(err) {
-    if (err) callback(err);
-    callback(null);
-  });
-}
-
-function createReqTeamsTable(callback) {
-  db.run('CREATE TABLE IF NOT EXISTS "REQTEAMS"                     \
-(                                                                   \
- "id" INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,                   \
- "soldier_id" INTEGER,                                              \
- "medic_id" INTEGER                                                 \
-)', function(err) {
-    if (err) callback(err);
-    callback(null);
-  });
-}
-
 function loadClassCounts(callback) {
   db.get('SELECT                                                    \
 (SELECT COUNT(*) FROM [PLAYERS] WHERE class_id=1) as count_solly,   \
@@ -351,7 +279,34 @@ app.all('/signup/:class_id?', require_login, function(req, res) {
 });
 
 app.get('/match', require_login, function(req, res) {
-  res.render('match');
+  db.get("\
+SELECT m.server_ip, m.server_port,     \
+t1.name as team1_name,        \
+t2.name as team2_name,       \
+p1.name as team1_soldier_name,        \
+p2.name as team1_medic_name,       \
+p3.name as team2_soldier_name,      \
+p4.name as team2_medic_name     \
+FROM MATCHES m        \
+JOIN TEAMS t1 ON t1.id = m.team1_id   \
+JOIN TEAMS t2 ON t2.id = m.team2_id     \
+JOIN PLAYERS p1 ON t1.soldier_id = p1.id    \
+JOIN PLAYERS p2 ON t1.medic_id = p2.id         \
+JOIN PLAYERS p3 ON t2.soldier_id = p3.id     \
+JOIN PLAYERS p4 ON t2.medic_id = p4.id          \
+WHERE round = 1 AND m.team1_id = 193 OR m.team2_id = 193         \
+", function(err, row) {
+  if (err) {
+    console.log("DB Err: " + err);
+    res.render('players', {
+      error: "Error fetching match info"
+      , players: []
+    });
+    return;
+  }
+
+  res.render('match', row);
+});
 });
 
 app.get('/players', function(req, res) {
@@ -467,12 +422,7 @@ if (process.platform.indexOf("win") === -1) {
 
 // Tasks to run before starting the server:
 async.series([
-  createPlayersTable
-, createTeamsTable
-, createMatchTable
-, createMatchCommsTable
-, createReqTeamsTable
-, loadClassCounts
+  loadClassCounts
 ], function(err) {
   if (err) {
     console.log("Error starting ultiduo server:\n  " + err);
@@ -484,3 +434,80 @@ async.series([
                 , app.address().port, app.settings.env);
   });
 });
+
+/*
+
+
+
+// team_id will first be 'teammate id' for now, and will point to the
+// team once team's are finished :p This is pretty terrible design, but
+// for now it avoids risking messing up the database (and I don't trust
+// sqlite as it is)
+function createPlayersTable(callback) {
+  db.run('CREATE TABLE IF NOT EXISTS "PLAYERS"                      \
+(                                                                   \
+ "id" INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL UNIQUE,            \
+ "name" TEXT NOT NULL check(typeof("name") = "text"),               \
+ "steamid" TEXT NOT NULL UNIQUE check(typeof("steamid") = "text"),  \
+ "class_id" INTEGER NOT NULL DEFAULT (0),                           \
+ "team_id" INTEGER NOT NULL DEFAULT (0)                             \
+)', function(err) {
+    if (err) callback(err);
+    callback(null);
+  });
+}
+
+function createTeamsTable(callback) {
+  db.run('CREATE TABLE IF NOT EXISTS "TEAMS"                        \
+(                                                                   \
+ "id" INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,                   \
+ "soldier_id" INTEGER,                                              \
+ "medic_id" INTEGER                                                 \
+)', function(err) {
+    if (err) callback(err);
+    callback(null);
+  });
+}
+
+function createMatchTable(callback) {
+  db.run('CREATE TABLE IF NOT EXISTS "MATCHES"                      \
+(                                                                   \
+ "id" INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,                   \
+ "team1_id" INTEGER,                                                \
+ "team2_id" INTEGER,                                                \
+ "round" INTEGER,                                                   \
+ "server_ip" TEXT,                                                  \
+ "server_port" INTEGER,                                             \
+ "team1_score" INTEGER,                                             \
+ "team2_score" INTEGER                                              \
+)', function(err) {
+    if (err) callback(err);
+    callback(null);
+  });
+}
+
+function createMatchCommsTable(callback) {
+  db.run('CREATE TABLE IF NOT EXISTS "MATCHE_COMMS"                 \
+(                                                                   \
+ "id" INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,                   \
+ "match_id" INTEGER,                                                \
+ "message" TEXT,                                                    \
+ "post_date" INTEGER                                                \
+)', function(err) {
+    if (err) callback(err);
+    callback(null);
+  });
+}
+
+function createReqTeamsTable(callback) {
+  db.run('CREATE TABLE IF NOT EXISTS "REQTEAMS"                     \
+(                                                                   \
+ "id" INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,                   \
+ "soldier_id" INTEGER,                                              \
+ "medic_id" INTEGER                                                 \
+)', function(err) {
+    if (err) callback(err);
+    callback(null);
+  });
+}
+*/

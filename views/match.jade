@@ -1,13 +1,24 @@
-h2 Match
-
 section#teams
+  h2 Match
   div#team_1
-    h3 Team #20
+    h3!= team1_name
+    h4!= team1_soldier_name
+    h4!= team1_medic_name
 
-  h3 Team #35
+  div#team_2
+    h3!= team2_name
+    h4!= team2_soldier_name
+    h4!= team2_medic_name
 
+  div#clear_float
 
 
 section#server_info
+  h2 Server
+
+  a(href='steam://connect/' + server_ip + ':' + server_port)
+    | #{server_ip}:#{server_port}
 
 section#match_comms
+  h2 Match Comms
+  p Coming soon
