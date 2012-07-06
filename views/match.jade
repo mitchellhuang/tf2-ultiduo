@@ -34,4 +34,16 @@ section#server_info
 
 section#match_comms
   h2 Match Comms
-  p Coming soon
+  each comm in match_comms
+    article
+      header
+        h3!= comm.name
+        | &nbsp;
+        time!= comm.post_date
+      p!= comm.message
+
+  form(action='/match', method='post')
+    input(type='hidden', name='match', id='match', value= match_id)
+    textarea(name='message', id='message', cols='50', rows='5', maxlength='300')
+    br
+    input(type='submit', value='Submit')

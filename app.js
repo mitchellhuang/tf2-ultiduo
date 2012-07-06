@@ -14,6 +14,7 @@ var express    = require('express')
   , steam_data = require('steam')
   , steam      = require('./steam.js')
   , async      = require('async')
+  , sanitizer  = require('sanitizer')
   , invite     = require('./invite_players.js')
   , _          = require('underscore');
 
@@ -272,7 +273,8 @@ app.all('/signup/:class_id?', require_login, function(req, res) {
 function getMatchPlayerInfo(team_id) {
   return function(callback) {
   db.get('\
-SELECT m.server_ip, m.server_port,                          \
+SELECT m.id as match_id,                                    \
+m.server_ip, m.server_port,                                 \
 t1.name as team1_name,                                      \
 t2.name as team2_name,                                      \
 p1.name as team1_soldier_name,                              \
@@ -300,19 +302,61 @@ WHERE round = 1 AND m.team1_id = $tid OR m.team2_id = $tid  \
 
 function getMatchComms(round, team_id) {
   return function(callback) {
-    callback(null, []);
+    db.all('\
+SELECT mc.message, mc.post_date, p.name                      \
+FROM MATCH_COMMS mc                                          \
+JOIN PLAYERS p ON p.id = mc.author_id                        \
+WHERE mc.match_id =                                          \
+(SELECT m.id FROM MATCHES m                                  \
+  WHERE (team1_id = 193 OR team2_id = 193) AND round = 1)    \
+    ', function(err, rows) {
+      if (err) callback(err);
+      callback(null, rows);
+    });
   };
 }
 
-app.get('/match', require_login, function(req, res) {
-  async.parallel([
+function maybePostComm(req) {
+  return function(callback) {
+    var data = req.body;
+    if (data === undefined || req.method !== "POST") return callback(null, "");
+    if (!data.match || !(/^\d+$/.test(data.match))) return callback(null, "");
+    if (!data.message || data.message.length > 300) return callback(null, "");
+    db.get('SELECT * FROM MATCHES WHERE id = ?1 \
+AND (team1_id = ?2 OR team2_id = ?2)', data.match, req.session.team_id,
+           function(err, row) {
+             if (err) callback(err);
+             if (row === undefined) {
+               console.log("Bad match id - possible hack attempt");
+               callback("Bad match id - possible hack attempt");
+               return;
+             }
+
+             db.run('INSERT INTO MATCH_COMMS  \
+                     (match_id, message, post_date, author_id)\
+                     VALUES (?1, ?2, datetime(?3, "unixepoch"), ?4)',
+                    data.match,
+                    sanitizer.sanitize(sanitizer.escape(data.message)),
+                     ""+Math.floor(+new Date()/1000),
+                     req.session.player_id, function(err) {
+                       if (err) callback(err);
+                       callback(null, null);
+                     });
+           });
+  };
+}
+
+app.all('/match', require_login, function(req, res) {
+  async.series([
     getMatchPlayerInfo(req.session.team_id),
+    maybePostComm(req),
     getMatchComms(config.round, req.session.team_id)
   ], function(err, results) {
     if (err) {
-      console.log("DB Err: " + err);
+      console.log('DB Err: ' + err);
       res.render('match', {
-        error: "Error fetching match info",
+        error: 'An error occurred',
+        match_id: 0,
         server_ip: null, server_port: null,
         team1_name: '', team2_name: '',
         team1_soldier_name: '', team1_soldier_steamid: '',
@@ -325,7 +369,7 @@ app.get('/match', require_login, function(req, res) {
     }
 
     var data = results[0];
-    data.match_comms = results[1];
+    data.match_comms = results[2];
 
     res.render('match', data);
   });
