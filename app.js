@@ -210,15 +210,6 @@ app.all('/signup/:class_id?', require_login, function(req, res) {
 
   // Handle a POST'd teammate field:
   if (req.body.teammate && /^\d+$/.test(req.body.teammate)) {
-/*    thingsToDo.push(function(callback) {
-      db.get('SELECT * FROM players WHERE id = ?1 AND class_id = ?2',
-             req.session.team_id, teammate_class_id,
-             function(err, row) {
-               if (err) return callback(err);
-               res.local('teammate', row);
-               callback(null);
-             });
-             }); */
     // TODO: Should actually do some validation checks here
     // (aside from the above number verification)
     req.session.team_id = +req.body.teammate;
@@ -278,35 +269,62 @@ app.all('/signup/:class_id?', require_login, function(req, res) {
 
 });
 
-app.get('/match', require_login, function(req, res) {
-  db.get("\
-SELECT m.server_ip, m.server_port,     \
-t1.name as team1_name,        \
-t2.name as team2_name,       \
-p1.name as team1_soldier_name,        \
-p2.name as team1_medic_name,       \
-p3.name as team2_soldier_name,      \
-p4.name as team2_medic_name     \
-FROM MATCHES m        \
-JOIN TEAMS t1 ON t1.id = m.team1_id   \
-JOIN TEAMS t2 ON t2.id = m.team2_id     \
-JOIN PLAYERS p1 ON t1.soldier_id = p1.id    \
-JOIN PLAYERS p2 ON t1.medic_id = p2.id         \
-JOIN PLAYERS p3 ON t2.soldier_id = p3.id     \
-JOIN PLAYERS p4 ON t2.medic_id = p4.id          \
-WHERE round = 1 AND m.team1_id = 193 OR m.team2_id = 193         \
-", function(err, row) {
-  if (err) {
-    console.log("DB Err: " + err);
-    res.render('players', {
-      error: "Error fetching match info"
-      , players: []
-    });
-    return;
-  }
+function getMatchPlayerInfo(team_id) {
+  return function(callback) {
+  db.get('\
+SELECT m.server_ip, m.server_port,                          \
+t1.name as team1_name,                                      \
+t2.name as team2_name,                                      \
+p1.name as team1_soldier_name,                              \
+p1.steamid as team1_soldier_steamid,                        \
+p2.name    as team1_medic_name,                             \
+p2.steamid as team1_medic_steamid,                          \
+p3.name    as team2_soldier_name,                           \
+p3.steamid as team2_soldier_steamid,                        \
+p4.name    as team2_medic_name,                             \
+p4.steamid as team2_medic_steamid                           \
+FROM MATCHES m                                              \
+JOIN TEAMS t1 ON t1.id = m.team1_id                         \
+JOIN TEAMS t2 ON t2.id = m.team2_id                         \
+JOIN PLAYERS p1 ON t1.soldier_id = p1.id                    \
+JOIN PLAYERS p2 ON t1.medic_id = p2.id                      \
+JOIN PLAYERS p3 ON t2.soldier_id = p3.id                    \
+JOIN PLAYERS p4 ON t2.medic_id = p4.id                      \
+WHERE round = 1 AND m.team1_id = $tid OR m.team2_id = $tid  \
+', { $tid: team_id }, function(err, row) {
+     if (err) callback(err);
+     callback(null, row);
+   });
+  };
+}
 
-  res.render('match', row);
-});
+function getMatchComms(round, team_id)
+
+app.get('/match', require_login, function(req, res) {
+  async.parallel([
+    getMatchPlayerInfo(req.session.team_id)
+  ], function(err, results) {
+    console.log(results)
+    if (err) {
+      console.log("DB Err: " + err);
+      res.render('match', {
+        error: "Error fetching match info",
+        server_ip: '', server_port: '',
+        team1_name: '', team2_name: '',
+        team1_soldier_name: '', team1_soldier_steamid: '',
+        team1_medic_name: '', team1_medic_steamid: '',
+        team2_soldier_name: '', team2_soldier_name: '',
+        team2_medic_name: '', team2_medic_steamid: '',
+        match_comms: []
+      });
+      return;
+    }
+
+    var data = results[0];
+    data.match_comms = results[1];
+
+    res.render('match', data);
+  });
 });
 
 app.get('/players', function(req, res) {

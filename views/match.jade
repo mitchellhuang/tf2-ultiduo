@@ -2,13 +2,21 @@ section#teams
   h2 Match
   div#team_1
     h3!= team1_name
-    h4!= team1_soldier_name
-    h4!= team1_medic_name
+    h4
+      a(href='http://steamcommunity.com/profiles/' + team1_soldier_steamid)
+        != team1_soldier_name
+    h4
+      a(href='http://steamcommunity.com/profiles/' + team1_medic_steamid)
+        != team1_medic_name
 
   div#team_2
     h3!= team2_name
-    h4!= team2_soldier_name
-    h4!= team2_medic_name
+    h4
+      a(href='http://steamcommunity.com/profiles/' + team2_soldier_steamid)
+        != team2_soldier_name
+    h4
+      a(href='http://steamcommunity.com/profiles/' + team2_medic_steamid)
+        != team2_medic_name
 
   div#clear_float
 
@@ -18,6 +26,8 @@ section#server_info
 
   a(href='steam://connect/' + server_ip + ':' + server_port)
     | #{server_ip}:#{server_port}
+
+  p The server will be available at 10:00PM on Satuday
 
 section#match_comms
   h2 Match Comms
