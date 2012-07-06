@@ -4,7 +4,10 @@ import sqlite3, sys, random
 
 # Fetches all teams signed up together
 GET_TEAMS = """
-SELECT id FROM TEAMS
+SELECT p1.id, p2.id
+FROM PLAYERS p1, PLAYERS p2
+WHERE p1.team_id = p2.id AND p2.team_id = p1.id
+  AND p1.class_id = 1 AND p2.class_id = 2
 """
 
 # Fetches all player ids playing in the tournament but not on a team

@@ -298,18 +298,22 @@ WHERE round = 1 AND m.team1_id = $tid OR m.team2_id = $tid  \
   };
 }
 
-function getMatchComms(round, team_id)
+function getMatchComms(round, team_id) {
+  return function(callback) {
+    callback(null, []);
+  };
+}
 
 app.get('/match', require_login, function(req, res) {
   async.parallel([
-    getMatchPlayerInfo(req.session.team_id)
+    getMatchPlayerInfo(req.session.team_id),
+    getMatchComms(config.round, req.session.team_id)
   ], function(err, results) {
-    console.log(results)
     if (err) {
       console.log("DB Err: " + err);
       res.render('match', {
         error: "Error fetching match info",
-        server_ip: '', server_port: '',
+        server_ip: null, server_port: null,
         team1_name: '', team2_name: '',
         team1_soldier_name: '', team1_soldier_steamid: '',
         team1_medic_name: '', team1_medic_steamid: '',

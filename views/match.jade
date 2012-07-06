@@ -24,8 +24,11 @@ section#teams
 section#server_info
   h2 Server
 
-  a(href='steam://connect/' + server_ip + ':' + server_port)
-    | #{server_ip}:#{server_port}
+  - if (server_ip !== null)
+    a(href='steam://connect/' + server_ip + ':' + server_port)
+      | #{server_ip}:#{server_port}
+  - else
+    p Server's will be assigned soon
 
   p The server will be available at 10:00PM on Satuday
 
