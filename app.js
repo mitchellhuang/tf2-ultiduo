@@ -275,6 +275,7 @@ function getMatchPlayerInfo(team_id) {
   db.get('\
 SELECT m.id as match_id,                                    \
 m.server_ip, m.server_port,                                 \
+m.team1_score, m.team2_score,                               \
 t1.name as team1_name,                                      \
 t2.name as team2_name,                                      \
 p1.name as team1_soldier_name,                              \
@@ -294,7 +295,7 @@ JOIN PLAYERS p3 ON t2.soldier_id = p3.id                    \
 JOIN PLAYERS p4 ON t2.medic_id = p4.id                      \
 WHERE round = 1 AND m.team1_id = $tid OR m.team2_id = $tid  \
 ', { $tid: team_id }, function(err, row) {
-     if (err) callback(err);
+     if (err) return callback(err);
      callback(null, row);
    });
   };
@@ -310,48 +311,87 @@ WHERE mc.match_id =                                          \
 (SELECT m.id FROM MATCHES m                                  \
   WHERE (team1_id = ?1 OR team2_id = ?1) AND round = ?2)    \
 ', team_id, round, function(err, rows) {
-      if (err) callback(err);
+      if (err) return callback(err);
       callback(null, rows);
     });
   };
 }
 
+function verifyMatchId(match_id, team_id, callback) {
+  db.get('SELECT * FROM MATCHES WHERE id = ?1 \
+AND (team1_id = ?2 OR team2_id = ?2)', match_id, team_id,
+         function(err, row) {
+           if (err) return callback(err);
+           if (row === undefined) {
+             console.log("Bad match id - possible hack attempt");
+             callback("Bad match id - possible hack attempt");
+             return;
+           }
+           callback(null);
+         });
+}
+
 function maybePostComm(req) {
   return function(callback) {
     var data = req.body;
-    if (data === undefined || req.method !== "POST") return callback(null, "");
-    if (!data.match || !(/^\d+$/.test(data.match))) return callback(null, "");
     if (!data.message || data.message.length > 300) return callback(null, "");
-    db.get('SELECT * FROM MATCHES WHERE id = ?1 \
-AND (team1_id = ?2 OR team2_id = ?2)', data.match, req.session.team_id,
-           function(err, row) {
-             if (err) callback(err);
-             if (row === undefined) {
-               console.log("Bad match id - possible hack attempt");
-               callback("Bad match id - possible hack attempt");
-               return;
-             }
 
-             db.run('INSERT INTO MATCH_COMMS  \
-                     (match_id, message, post_date, author_id)\
-                     VALUES (?1, ?2, datetime(?3, "unixepoch"), ?4)',
-                    data.match,
-                    sanitizer.sanitize(sanitizer.escape(data.message)),
-                     ""+Math.floor(+new Date()/1000),
-                     req.session.player_id, function(err) {
-                       if (err) callback(err);
-                       callback(null, null);
-                     });
-           });
+    verifyMatchId(data.match, req.session.team_id, function(err) {
+      if (err) return callback(err);
+      db.run('INSERT INTO MATCH_COMMS (match_id, message, post_date, author_id)\
+                               VALUES (?1, ?2, datetime(?3, "unixepoch"), ?4)',
+             data.match,
+             sanitizer.sanitize(sanitizer.escape(data.message)),
+             ""+Math.floor(+new Date()/1000),
+             req.session.player_id,
+             function(err) {
+               if (err) return callback(err);
+               callback(null, null);
+             });
+    });
+  };
+}
+
+function maybeSetMatchScores(req) {
+  return function(callback) {
+    var data = req.body
+      , team1_score = +data.team1_score
+      , team2_score = +data.team2_score;
+
+    if (team1_score < 0 || team1_score >= 10
+      || team2_score < 0 || team2_score >= 10)
+      return callback("Invalid scores entered");
+
+    verifyMatchId(data.match, req.session.team_id, function(err) {
+      if (err) return callback(err);
+      db.run('UPDATE MATCHES SET team1_score = ?1, team2_score = ?2 \
+WHERE id = ?3', req.body.team1_score,
+             req.body.team2_score, req.body.match, function(err) {
+               if (err) return callback(err);
+               callback(null, null);
+             });
+    });
   };
 }
 
 app.all('/match', require_login, function(req, res) {
-  async.series([
-    getMatchPlayerInfo(req.session.team_id),
-    maybePostComm(req),
-    getMatchComms(config.round, req.session.team_id)
-  ], function(err, results) {
+  var tasks = [];
+
+  if (req.method === "POST"
+   && req.body !== undefined
+   && req.body.match !== undefined
+   && /^\d+$/.test(req.body.match)) {
+    if (req.body.message !== undefined)
+      tasks.push(maybePostComm(req));
+    if (req.body.team1_score !== undefined
+      && req.body.team2_score !== undefined)
+      tasks.push(maybeSetMatchScores(req));
+  }
+
+  tasks.push(getMatchPlayerInfo(req.session.team_id));
+  tasks.push(getMatchComms(config.round, req.session.team_id));
+
+  async.series(tasks, function(err, results) {
     if (err) {
       console.log('DB Err: ' + err);
       res.render('match', {
@@ -368,8 +408,8 @@ app.all('/match', require_login, function(req, res) {
       return;
     }
 
-    var data = results[0];
-    data.match_comms = results[2];
+    var data = results[tasks.length - 2];
+    data.match_comms = results[tasks.length - 1];
 
     res.render('match', data);
   });

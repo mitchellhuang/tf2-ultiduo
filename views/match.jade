@@ -36,6 +36,27 @@ section#server_info
 
   p Servers will be available at 9:00PM on Saturday.
 
+section#match_score
+  h2 Match Score
+  p
+    | We're working on the honor system here - if you have any issues
+    |  reporting scores contact an
+    a(href='/admins')  admin
+    | .
+  form(action='/match', method='POST')
+    input(type='hidden', name='match', id='match', value= match_id)
+    label(for='team1_score') #{team1_name}:&nbsp;
+    input(type='text', name='team1_score', id='team1_score', maxlength='1',
+         value= team1_score || 0)
+    br
+    label(for='team2_score') #{team2_name}:&nbsp;
+    input(type='text', name='team2_score', id='team2_score', maxlength='1',
+          value= team2_score || 0)
+    br
+    input(type='submit', value='Submit scores')
+
+
+
 section#match_comms
   h2 Match Comms
   each comm in match_comms
