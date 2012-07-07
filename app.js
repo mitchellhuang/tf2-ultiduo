@@ -308,8 +308,8 @@ FROM MATCH_COMMS mc                                          \
 JOIN PLAYERS p ON p.id = mc.author_id                        \
 WHERE mc.match_id =                                          \
 (SELECT m.id FROM MATCHES m                                  \
-  WHERE (team1_id = 193 OR team2_id = 193) AND round = 1)    \
-    ', function(err, rows) {
+  WHERE (team1_id = ?1 OR team2_id = ?1) AND round = ?2)    \
+', team_id, round, function(err, rows) {
       if (err) callback(err);
       callback(null, rows);
     });
