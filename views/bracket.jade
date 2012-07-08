@@ -1,3 +1,18 @@
 p
   | We are having technical difficulties with the bracket display - this page
-  |  will be updated shortly.
+  |  will be updated when we have it fixed. For now, the matchups for
+  |  round 1 are as follow:
+
+h2 Bracket
+
+table.matches
+  tr
+    th Team 1
+    th Team 2
+    th Reported Score
+
+  each match in matches
+    tr
+      td!= match.team1_name
+      td!= match.team2_name
+      td #{match.team1_score}-#{match.team2_score}

@@ -74,11 +74,6 @@ app.configure(function(){
   app.use(express.static(pubdir));
 });
 
-//
-app.helpers({
-  error: false
-});
-
 app.configure('development', function(){
   app.use(express.errorHandler({ dumpExceptions: true, showStack: true }));
   app.use(express.logger());
@@ -86,6 +81,11 @@ app.configure('development', function(){
 
 app.configure('production', function(){
   app.use(express.errorHandler());
+});
+
+// Default values for views to use
+app.helpers({
+  error: false
 });
 
 // Parameter Pre-conditions
@@ -126,7 +126,29 @@ app.get('/rules', function(req, res) {
 });
 
 app.get('/bracket', function(req, res) {
-  res.render('bracket');
+  db.all('SELECT          \
+t1.name as team1_name,    \
+t2.name as team2_name,    \
+team1_score,              \
+team2_score               \
+FROM MATCHES m            \
+JOIN TEAMS t1 ON t1.id = m.team1_id  \
+JOIN TEAMS t2 ON t2.id = m.team2_id  \
+WHERE m.round = ?', config.round,
+         function(err, rows) {
+           if (err) {
+             console.log("DB Err: " + err);
+             res.render('bracket', {
+               error: 'Error fetching matches'
+             , matches: []
+             });
+             return;
+           }
+
+           res.render('bracket', {
+             matches: rows
+           });
+         });
 });
 
 app.get('/time', function(req, res) {
@@ -275,7 +297,7 @@ app.all('/signup/:class_id?', require_login, function(req, res) {
 
 function getMatchPlayerInfo(team_id) {
   return function(callback) {
-  db.get('\
+    db.get('\
 SELECT m.id as match_id,                                    \
 m.server_ip, m.server_port,                                 \
 m.team1_score, m.team2_score,                               \
@@ -298,9 +320,9 @@ JOIN PLAYERS p3 ON t2.soldier_id = p3.id                    \
 JOIN PLAYERS p4 ON t2.medic_id = p4.id                      \
 WHERE round = 1 AND m.team1_id = $tid OR m.team2_id = $tid  \
 ', { $tid: team_id }, function(err, row) {
-     if (err) return callback(err);
-     callback(null, row);
-   });
+      if (err) return callback(err);
+      callback(null, row);
+    });
   };
 }
 
