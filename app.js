@@ -147,6 +147,9 @@ app.get('/request', function(req, res) {
 
 // /:csrf?
 app.all('/signup/:class_id?', require_login, function(req, res) {
+  res.render('signupdone');
+  return;
+
   // 'Optional' flags for rendering optional results
   // These can't be left undefined or jade complains
   res.local('full_class', false);

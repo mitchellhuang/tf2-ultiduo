@@ -29,12 +29,20 @@ section#server_info
   h2 Server
 
   - if (server_ip !== null)
-    a(href='steam://connect/' + server_ip + ':' + server_port)
-      | #{server_ip}:#{server_port}
+    h3 Server's are currently online
+    a(href='steam://connect/' + server_ip + ':' + server_port + '/ultiduo')
+      | connect #{server_ip}:#{server_port}; password ultiduo
+    p
+      | Password is:
+      b  ultiduo
+    p
+      | SourceTV port is:&nbsp;
+      b!= server_port + 10000
+    p SourceTV connect command:
+      a(href='steam://connect/' + server_ip + ':' + (server_port + 10000))
+        | connect #{server_ip}:#{server_port}
   - else
-    p Servers are not yet available.
-
-  p Servers will be available at 9:00PM on Saturday.
+    p Servers are not currently available.
 
 section#match_score
   h2 Match Score
