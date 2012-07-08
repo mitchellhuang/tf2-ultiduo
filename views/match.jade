@@ -38,7 +38,7 @@ section#server_info
     p
       | SourceTV port is:&nbsp;
       b!= server_port + 10000
-    p SourceTV connect command:
+    p SourceTV connect command:&nbsp;
       a(href='steam://connect/' + server_ip + ':' + (server_port + 10000))
         | connect #{server_ip}:#{server_port}
   - else
