@@ -71,7 +71,6 @@ app.configure(function(){
     , cookie: { m02axAge: 5 * 24 * 60 * 60 * 1000 }
   }));
   app.use(express.compiler({ src: pubdir, enable: ['less']}));
-  //app.use(connect.csrf());
   app.use(app.router);
   app.use(express.static(pubdir));
 });
@@ -547,80 +546,3 @@ async.series([
                 , app.address().port, app.settings.env);
   });
 });
-
-/*
-
-
-
-// team_id will first be 'teammate id' for now, and will point to the
-// team once team's are finished :p This is pretty terrible design, but
-// for now it avoids risking messing up the database (and I don't trust
-// sqlite as it is)
-function createPlayersTable(callback) {
-  db.run('CREATE TABLE IF NOT EXISTS "PLAYERS"                      \
-(                                                                   \
- "id" INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL UNIQUE,            \
- "name" TEXT NOT NULL check(typeof("name") = "text"),               \
- "steamid" TEXT NOT NULL UNIQUE check(typeof("steamid") = "text"),  \
- "class_id" INTEGER NOT NULL DEFAULT (0),                           \
- "team_id" INTEGER NOT NULL DEFAULT (0)                             \
-)', function(err) {
-    if (err) callback(err);
-    callback(null);
-  });
-}
-
-function createTeamsTable(callback) {
-  db.run('CREATE TABLE IF NOT EXISTS "TEAMS"                        \
-(                                                                   \
- "id" INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,                   \
- "soldier_id" INTEGER,                                              \
- "medic_id" INTEGER                                                 \
-)', function(err) {
-    if (err) callback(err);
-    callback(null);
-  });
-}
-
-function createMatchTable(callback) {
-  db.run('CREATE TABLE IF NOT EXISTS "MATCHES"                      \
-(                                                                   \
- "id" INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,                   \
- "team1_id" INTEGER,                                                \
- "team2_id" INTEGER,                                                \
- "round" INTEGER,                                                   \
- "server_ip" TEXT,                                                  \
- "server_port" INTEGER,                                             \
- "team1_score" INTEGER,                                             \
- "team2_score" INTEGER                                              \
-)', function(err) {
-    if (err) callback(err);
-    callback(null);
-  });
-}
-
-function createMatchCommsTable(callback) {
-  db.run('CREATE TABLE IF NOT EXISTS "MATCHE_COMMS"                 \
-(                                                                   \
- "id" INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,                   \
- "match_id" INTEGER,                                                \
- "message" TEXT,                                                    \
- "post_date" INTEGER                                                \
-)', function(err) {
-    if (err) callback(err);
-    callback(null);
-  });
-}
-
-function createReqTeamsTable(callback) {
-  db.run('CREATE TABLE IF NOT EXISTS "REQTEAMS"                     \
-(                                                                   \
- "id" INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,                   \
- "soldier_id" INTEGER,                                              \
- "medic_id" INTEGER                                                 \
-)', function(err) {
-    if (err) callback(err);
-    callback(null);
-  });
-}
-*/
