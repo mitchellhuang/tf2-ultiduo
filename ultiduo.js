@@ -541,6 +541,8 @@ async.series([
   }
 
   app.listen(config.port, function(){
+    var pidfile = require('pid');
+    pidfile('./ultiduo.pid');
     console.log("Ultiduo Voting listening on port %d in %s mode."
                 , app.address().port, app.settings.env);
   });

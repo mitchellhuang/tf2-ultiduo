@@ -1,1 +1,3 @@
-NODE_ENV=production node ultiduo.js
+export NODE_ENV=production
+forever --sourceDir /var/www/ultiduo start ultiduo.js
+
