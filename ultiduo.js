@@ -519,7 +519,7 @@ app.get('/logout', function(req, res) {
 });
 
 if (process.platform.indexOf("win") === -1) {
-// Gracefull shutdown
+  // Gracefull shutdown
   process.on('SIGTERM', function () {
     console.log('Shutting down...');
     db.close();
