@@ -12,10 +12,10 @@ var express    = require('express')
   , connect    = require('connect')
   , sqlite     = require('sqlite3')
   , steam_data = require('steam')
-  , steam      = require('./steam.js')
+  , steam      = require('./steam')
   , async      = require('async')
   , sanitizer  = require('sanitizer')
-  , invite     = require('./invite_players.js')
+  , invite     = require('./invite_players')
   , _          = require('underscore');
 
 var app = module.exports = express.createServer();
@@ -118,11 +118,9 @@ function require_login(req, res, next) {
   });
 }
 
-// Routes
-app.get('/', function(req, res) {
-  res.render('index');
-});
+require('./routes/')(app, config, db);
 
+// Routes
 app.get('/rules', function(req, res) {
   res.render('rules');
 });
