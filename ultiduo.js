@@ -121,9 +121,6 @@ function require_login(req, res, next) {
 require('./routes/')(app, config, db);
 
 // Routes
-app.get('/rules', function(req, res) {
-  res.render('rules');
-});
 
 app.get('/bracket', function(req, res) {
   db.all('SELECT          \
@@ -150,23 +147,6 @@ WHERE m.round = ?', config.round,
            });
          });
 });
-
-app.get('/time', function(req, res) {
-  res.render('time');
-});
-
-app.get('/admins', function(req, res) {
-  res.render('admins');
-});
-
-app.get('/credits', function(req, res) {
-  res.render('credits');
-});
-
-app.get('/request', function(req, res) {
-  res.render('request');
-});
-
 // /:csrf?
 app.all('/signup/:class_id?', require_login, function(req, res) {
   res.render('signupdone');
