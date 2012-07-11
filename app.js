@@ -63,11 +63,13 @@ app.configure(function(){
   app.use(express.bodyParser());
   app.use(express.methodOverride());
   app.use(express.cookieParser());
-  app.use(express.session({ secret: 'ultiduo949172463r57276'
-                          , key: 'express.sid'
-                          , store: new connect.middleware.session.MemoryStore()
-                          // Cookies expire in 5 days (or when server restarts)
-                          , cookie: { m02axAge: 5 * 24 * 60 * 60 * 1000 } }));
+  app.use(express.session({
+    secret: 'ultiduo949172463r57276'
+    , key: 'express.sid'
+    , store: new connect.middleware.session.MemoryStore()
+    // Cookies expire in 5 days (or when server restarts)
+    , cookie: { m02axAge: 5 * 24 * 60 * 60 * 1000 }
+  }));
   app.use(express.compiler({ src: pubdir, enable: ['less']}));
   //app.use(connect.csrf());
   app.use(app.router);
