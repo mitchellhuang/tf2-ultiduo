@@ -123,6 +123,7 @@ require('./routes/')(app, config, db);
 
 app.get('/bracket', function(req, res) {
   db.all('SELECT          \
+m.id,                     \
 t1.name as team1_name,    \
 t2.name as team2_name,    \
 team1_score,              \

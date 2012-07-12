@@ -7,12 +7,14 @@ h2 Current Matches
 
 table.matches
   tr
+    th Match #
     th Team 1
     th Team 2
     th Reported Score
 
   each match in matches
     tr
+      td!= match.id
       td!= match.team1_name
       td!= match.team2_name
       td #{match.team1_score}-#{match.team2_score}
