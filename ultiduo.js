@@ -146,6 +146,7 @@ WHERE m.round = ?', config.round,
            });
          });
 });
+
 // /:csrf?
 app.all('/signup/:class_id?', require_login, function(req, res) {
   res.render('signupdone');
