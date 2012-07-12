@@ -1,5 +1,18 @@
 section#teams
   h2 Round: #{round_id}
+  - if (config.round > 1)
+    p
+      - for (var n = 1; n < config.round; ++n)
+        - if (n == round_id)
+          != n
+        - else
+          a(href='/match/'+n)!= n
+        | &nbsp;-&nbsp;
+      - if (round_id == config.round)
+        != config.round
+      - else
+        a(href='/match')!= config.round
+
   h2 Match Information
   div#team_1
     h3!= team1_name
@@ -22,8 +35,10 @@ section#teams
   div#clear_float
 
 p
-  | Remember that matches are to be played 10:00PM EST on this
-  | upcoming Saturday (July 7th).
+  | Remember that matches are to be played 10:00PM EST on Saturdays.
+  |  If either team cannot make it, please use the match comms below to
+  |  find a time that works for all players.
+
 p Scores are to be reported by Wednesday at the latest.
 
 section#server_info
@@ -47,24 +62,30 @@ section#server_info
 
 section#match_score
   h2 Match Score
-  p
-    | We're working on the honor system here - if you have any issues
-    |  reporting scores contact an&nbsp;
-    a(href='/admins') admin
-    | .
-  form(action='/match', method='POST')
-    input(type='hidden', name='match', id='match', value= match_id)
-    label(for='team1_score') #{team1_name}:&nbsp;
-    input(type='text', name='team1_score', id='team1_score', maxlength='1',
-         value= team1_score || 0)
-    br
-    label(for='team2_score') #{team2_name}:&nbsp;
-    input(type='text', name='team2_score', id='team2_score', maxlength='1',
-          value= team2_score || 0)
-    br
-    input(type='submit', value='Submit scores')
-
-
+  - if (round_id == config.round)
+    p
+      | We're working on the honor system here - if you have any issues
+      |  reporting scores contact an&nbsp;
+      a(href='/admins') admin
+      | .
+    form(action='/match', method='POST')
+      input(type='hidden', name='match', id='match', value= match_id)
+      label(for='team1_score') #{team1_name}:&nbsp;
+      input(type='text', name='team1_score', id='team1_score', maxlength='1',
+           value= team1_score || 0)
+      br
+      label(for='team2_score') #{team2_name}:&nbsp;
+      input(type='text', name='team2_score', id='team2_score', maxlength='1',
+            value= team2_score || 0)
+      br
+      input(type='submit', value='Submit scores')
+  - else
+    p
+      | The match score for this round was:&nbsp;
+      b #{team1_score}-#{team2_score}
+      | . If this is incorrect, please contact an&nbsp;
+      a(href='/admins') admin
+      | .
 
 section#match_comms
   h2 Match Comms
@@ -76,8 +97,11 @@ section#match_comms
         time!= comm.post_date
       p!= comm.message
 
-  form(action='/match', method='post')
-    input(type='hidden', name='match', id='match', value= match_id)
-    textarea(name='message', id='message', cols='50', rows='5', maxlength='300')
-    br
-    input(type='submit', value='Submit')
+  - if (round_id == config.round)
+    form(action='/match', method='post')
+      input(type='hidden', name='match', id='match', value= match_id)
+      textarea(name='message', id='message', cols='50', rows='5', maxlength='300')
+      br
+      input(type='submit', value='Submit')
+  - else
+    b Additional match comms can not be added to old matches

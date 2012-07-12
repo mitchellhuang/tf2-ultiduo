@@ -277,7 +277,7 @@ app.all('/signup/:class_id?', require_login, function(req, res) {
 
 });
 
-function getMatchPlayerInfo(team_id) {
+function getMatchPlayerInfo(round, team_id) {
   return function(callback) {
     db.get('\
 SELECT m.id as match_id,                                    \
@@ -301,9 +301,10 @@ JOIN PLAYERS p1 ON t1.soldier_id = p1.id                    \
 JOIN PLAYERS p2 ON t1.medic_id = p2.id                      \
 JOIN PLAYERS p3 ON t2.soldier_id = p3.id                    \
 JOIN PLAYERS p4 ON t2.medic_id = p4.id                      \
-WHERE round = 1 AND m.team1_id = $tid OR m.team2_id = $tid  \
-', { $tid: team_id }, function(err, row) {
+WHERE m.round = $round AND (m.team1_id = $tid OR m.team2_id = $tid)  \
+', { $round: round, $tid: team_id }, function(err, row) {
       if (err) return callback(err);
+      if (typeof row === "undefined") return callback('Match not yet assigned.');
       callback(null, row);
     });
   };
@@ -332,7 +333,7 @@ AND (team1_id = ?2 OR team2_id = ?2)', match_id, team_id,
            if (err) return callback(err);
            if (row === undefined) {
              console.log("Bad match id - possible hack attempt");
-             callback("Bad match id - possible hack attempt");
+             callback("Bad match id");
              return;
            }
            callback(null);
@@ -382,10 +383,31 @@ WHERE id = ?3', req.body.team1_score,
   };
 }
 
-app.all('/match', require_login, function(req, res) {
-  var tasks = [];
+app.param('match_id', function(req, res, next, id) {
+  if (/^\d+$/.test(id) && +id >= 0)
+    db.get('SELECT * FROM MATCHES WHERE id = ?', id, function(err, row) {
+      if (!err && row) next();
+      else next(new Error('Invalid match id'));
+    });
+  else
+    next(new Error('Invalid match id'));
+});
+
+app.param('round', function(req, res, next, id) {
+  var n = +id;
+  if (/^\d+$/.test(id) && n >= 1 && n <= config.round)
+    next();
+  else
+    next(new Error('Invalid round number'));
+});
+
+app.all('/match/:round?', require_login, function(req, res) {
+  var tasks = []
+    , data = {}
+    , round = +(req.params.round || config.round);
 
   if (req.method === "POST"
+   && round === config.round
    && req.body !== undefined
    && req.body.match !== undefined
    && /^\d+$/.test(req.body.match)) {
@@ -396,28 +418,32 @@ app.all('/match', require_login, function(req, res) {
       tasks.push(maybeSetMatchScores(req));
   }
 
-  tasks.push(getMatchPlayerInfo(req.session.team_id));
-  tasks.push(getMatchComms(config.round, req.session.team_id));
+  tasks.push(getMatchPlayerInfo(round, req.session.team_id));
+  tasks.push(getMatchComms(round, req.session.team_id));
+
+  var data = {
+    round_id: round,
+    match_id: 0,
+    server_ip: null, server_port: null,
+    team1_name: '', team2_name: '',
+    team1_soldier_name: '', team1_soldier_steamid: '',
+    team1_medic_name: '', team1_medic_steamid: '',
+    team2_soldier_name: '', team2_soldier_steamid: '',
+    team2_medic_name: '', team2_medic_steamid: '',
+    team1_score: '', team2_score: '',
+    match_comms: []
+  };
 
   async.series(tasks, function(err, results) {
     if (err) {
       console.log('DB Err: ' + err);
-      res.render('match', {
-        error: 'An error occurred',
-        match_id: 0,
-        server_ip: null, server_port: null,
-        team1_name: '', team2_name: '',
-        team1_soldier_name: '', team1_soldier_steamid: '',
-        team1_medic_name: '', team1_medic_steamid: '',
-        team2_soldier_name: '', team2_soldier_name: '',
-        team2_medic_name: '', team2_medic_steamid: '',
-        match_comms: []
-      });
+      data.error = "An error occurred, matches may not have been assigned yet.";
+      res.render('match', data);
       return;
     }
 
-    var data = results[tasks.length - 2];
-    data.match_comms = results[tasks.length - 1];
+    data = results[tasks.length - 2] || data;
+    data.match_comms = results[tasks.length - 1] || [];
 
     res.render('match', data);
   });
