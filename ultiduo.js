@@ -86,7 +86,8 @@ app.configure('production', function(){
 
 // Default values for views to use
 app.helpers({
-  error: false
+  error: false,
+  config: config
 });
 
 // Parameter Pre-conditions
@@ -280,6 +281,7 @@ function getMatchPlayerInfo(team_id) {
   return function(callback) {
     db.get('\
 SELECT m.id as match_id,                                    \
+m.round as round_id,                                        \
 m.server_ip, m.server_port,                                 \
 m.team1_score, m.team2_score,                               \
 t1.name as team1_name,                                      \
