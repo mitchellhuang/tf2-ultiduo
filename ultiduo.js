@@ -304,7 +304,7 @@ JOIN PLAYERS p4 ON t2.medic_id = p4.id                      \
 WHERE m.round = $round AND (m.team1_id = $tid OR m.team2_id = $tid)  \
 ', { $round: round, $tid: team_id }, function(err, row) {
       if (err) return callback(err);
-      if (typeof row === "undefined") return callback('Match not yet assigned.');
+      if (typeof row === "undefined") return callback('Match not yet assigned');
       callback(null, row);
     });
   };
@@ -437,7 +437,9 @@ app.all('/match/:round?', require_login, function(req, res) {
   async.series(tasks, function(err, results) {
     if (err) {
       console.log('DB Err: ' + err);
-      data.error = "An error occurred, matches may not have been assigned yet.";
+      data.error = "An error occurred, matches may not have been assigned yet."
+                                  + ' or you do not have a match this week.'
+  + ' Check the bracket page to verify that you have a match this week.';
       res.render('match', data);
       return;
     }

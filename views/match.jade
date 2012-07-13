@@ -1,4 +1,5 @@
 section#teams
+  a(href='/logout') Logout
   h2 Round: #{round_id}
   - if (config.round > 1)
     p
@@ -41,67 +42,69 @@ p
 
 p Scores are to be reported by Wednesday at the latest.
 
-section#server_info
-  h2 Server
+-if (team1_name && team1_name !== '')
+  section#server_info
+    h2 Server
 
-  - if (server_ip !== null)
-    h3 Server's are currently online
-    a(href='steam://connect/' + server_ip + ':' + server_port + '/ultiduo')
-      | connect #{server_ip}:#{server_port}; password ultiduo
-    p
-      | Password is:
-      b  ultiduo
-    p
-      | SourceTV port is:&nbsp;
-      b!= server_port + 10000
-    p SourceTV connect command:&nbsp;
-      a(href='steam://connect/' + server_ip + ':' + (server_port + 10000))
-        | connect #{server_ip}:#{server_port}
-  - else
-    p Servers are not currently available.
+    - if (server_ip !== null)
+      h3 Server's are currently online
+      a(href='steam://connect/' + server_ip + ':' + server_port + '/ultiduo')
+        | connect #{server_ip}:#{server_port}; password ultiduo
+      p
+        | Password is:
+        b  ultiduo
+      p
+        | SourceTV port is:&nbsp;
+        b!= server_port + 10000
+      p SourceTV connect command:&nbsp;
+        a(href='steam://connect/' + server_ip + ':' + (server_port + 10000))
+          | connect #{server_ip}:#{server_port}
+    - else
+      p Servers are not currently available.
 
-section#match_score
-  h2 Match Score
-  - if (round_id == config.round)
-    p
-      | We're working on the honor system here - if you have any issues
-      |  reporting scores contact an&nbsp;
+
+  section#match_score
+    h2 Match Score
+    - if (round_id == config.round)
+      p
+        | We're working on the honor system here - if you have any issues
+        |  reporting scores contact an&nbsp;
+        a(href='/admins') admin
+        | .
+      form(action='/match', method='POST')
+        input(type='hidden', name='match', id='match', value= match_id)
+        label(for='team1_score') #{team1_name}:&nbsp;
+        input(type='text', name='team1_score', id='team1_score', maxlength='1',
+             value= team1_score || 0)
+        br
+        label(for='team2_score') #{team2_name}:&nbsp;
+        input(type='text', name='team2_score', id='team2_score', maxlength='1',
+              value= team2_score || 0)
+        br
+        input(type='submit', value='Submit scores')
+    - else
+      p
+        | The match score for this round was:&nbsp;
+        b #{team1_score}-#{team2_score}
+        | . If this is incorrect, please contact an&nbsp;
       a(href='/admins') admin
       | .
-    form(action='/match', method='POST')
-      input(type='hidden', name='match', id='match', value= match_id)
-      label(for='team1_score') #{team1_name}:&nbsp;
-      input(type='text', name='team1_score', id='team1_score', maxlength='1',
-           value= team1_score || 0)
-      br
-      label(for='team2_score') #{team2_name}:&nbsp;
-      input(type='text', name='team2_score', id='team2_score', maxlength='1',
-            value= team2_score || 0)
-      br
-      input(type='submit', value='Submit scores')
-  - else
-    p
-      | The match score for this round was:&nbsp;
-      b #{team1_score}-#{team2_score}
-      | . If this is incorrect, please contact an&nbsp;
-      a(href='/admins') admin
-      | .
 
-section#match_comms
-  h2 Match Comms
-  each comm in match_comms
-    article
-      header
-        h3!= comm.name
-        | &nbsp;
-        time!= comm.post_date
-      p!= comm.message
+  section#match_comms
+    h2 Match Comms
+    each comm in match_comms
+      article
+        header
+          h3!= comm.name
+          | &nbsp;
+          time!= comm.post_date
+        p!= comm.message
 
-  - if (round_id == config.round)
-    form(action='/match', method='post')
-      input(type='hidden', name='match', id='match', value= match_id)
-      textarea(name='message', id='message', cols='50', rows='5', maxlength='300')
-      br
-      input(type='submit', value='Submit')
-  - else
-    b Additional match comms can not be added to old matches
+    - if (round_id == config.round)
+      form(action='/match', method='post')
+        input(type='hidden', name='match', id='match', value= match_id)
+        textarea(name='message', id='message', cols='50', rows='5', maxlength='300')
+        br
+        input(type='submit', value='Submit')
+    - else
+      b Additional match comms can not be added to old matches
