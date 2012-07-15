@@ -99,6 +99,27 @@ app.param('class_id', function(req, res, next, id) {
     next(new Error('Invalid class id: ' + id));
 });
 
+app.param('match_id', function(req, res, next, id) {
+  if (/^\d+$/.test(id) && +id >= 0)
+    db.get('SELECT * FROM MATCHES WHERE id = ?', id, function(err, row) {
+      if (!err && row) {
+        req.match = row;
+        next();
+      }
+      else next(new Error('Invalid match id'));
+    });
+  else
+    next(new Error('Invalid match id'));
+});
+
+app.param('round', function(req, res, next, id) {
+  var n = +id;
+  if (/^\d+$/.test(id) && n >= 1 && n <= config.round)
+    next();
+  else
+    next(new Error('Invalid round number'));
+});
+
 require('./routes/')(app, config, db);
 
 // Routes
@@ -364,24 +385,6 @@ WHERE id = ?3', req.body.team1_score,
     });
   };
 }
-
-app.param('match_id', function(req, res, next, id) {
-  if (/^\d+$/.test(id) && +id >= 0)
-    db.get('SELECT * FROM MATCHES WHERE id = ?', id, function(err, row) {
-      if (!err && row) next();
-      else next(new Error('Invalid match id'));
-    });
-  else
-    next(new Error('Invalid match id'));
-});
-
-app.param('round', function(req, res, next, id) {
-  var n = +id;
-  if (/^\d+$/.test(id) && n >= 1 && n <= config.round)
-    next();
-  else
-    next(new Error('Invalid round number'));
-});
 
 app.all('/match/:round?', common.require_login, function(req, res) {
   var tasks = []

@@ -92,13 +92,7 @@ p Scores are to be reported by Wednesday at the latest.
 
   section#match_comms
     h2 Match Comms
-    each comm in match_comms
-      article
-        header
-          h3!= comm.name
-          | &nbsp;
-          time!= comm.post_date
-        p!= comm.message
+    != partial('match_comm', { collection: match_comms, as: global })
 
     - if (round_id == config.round)
       form(action='/match', method='post')
