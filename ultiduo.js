@@ -132,7 +132,8 @@ team2_score               \
 FROM MATCHES m            \
 JOIN TEAMS t1 ON t1.id = m.team1_id  \
 JOIN TEAMS t2 ON t2.id = m.team2_id  \
-WHERE m.round = ?', config.round,
+WHERE m.round = ?                    \
+ORDER BY team1_score DESC', config.round,
          function(err, rows) {
            if (err) {
              console.log("DB Err: " + err);

@@ -1,9 +1,4 @@
-p
-  | We are having technical difficulties with the bracket display - this page
-  |  will be updated when we have it fixed. For now, the matchups for
-  |  round 1 are as follow:
-
-h2 Current Matches
+h2 Current Matches (Round #{config.round})
 
 table.matches
   tr
@@ -17,7 +12,10 @@ table.matches
       td!= match.id
       td!= match.team1_name
       td!= match.team2_name
-      td #{match.team1_score}-#{match.team2_score}
+      - if (match.team1_score !== null)
+        td #{match.team1_score}-#{match.team2_score}
+      - else
+        td Not reported
 
 h2 Overall Bracket
 
