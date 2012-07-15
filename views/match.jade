@@ -46,7 +46,7 @@ p Scores are to be reported by Wednesday at the latest.
   section#server_info
     h2 Server
 
-    - if (server_ip !== null)
+    - if (server_ip !== null && server_ip !== '')
       h3 Server's are currently online
       a(href='steam://connect/' + server_ip + ':' + server_port + '/ultiduo')
         | connect #{server_ip}:#{server_port}; password ultiduo
