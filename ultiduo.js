@@ -16,7 +16,8 @@ var express    = require('express')
   , async      = require('async')
   , sanitizer  = require('sanitizer')
   , invite     = require('./invite_players')
-  , _          = require('underscore');
+  , _          = require('underscore')
+  , common     = require('common');
 
 var app = module.exports = express.createServer();
 
@@ -103,21 +104,6 @@ app.param('class_id', function(req, res, next, id) {
     next(new Error('Invalid class id: ' + id));
 });
 
-// Middleware for pages that require a login
-function require_login(req, res, next) {
-  // If we're already logged in, show the page:
-  if (req.session.player)
-    return next();
-
-  var realm = 'http://' + req.headers.host
-    , return_to = realm + '/verify?returnto=' + req.url;
-  var steam_login = steam.genURL(return_to, realm);
-
-  res.render('login', {
-    steam_url: steam_login
-  });
-}
-
 require('./routes/')(app, config, db);
 
 // Routes
@@ -151,7 +137,7 @@ ORDER BY team1_score DESC', config.round,
 });
 
 // /:csrf?
-app.all('/signup/:class_id?', require_login, function(req, res) {
+app.all('/signup/:class_id?', common.require_login, function(req, res) {
   res.render('signupdone');
   return;
 
@@ -402,7 +388,7 @@ app.param('round', function(req, res, next, id) {
     next(new Error('Invalid round number'));
 });
 
-app.all('/match/:round?', require_login, function(req, res) {
+app.all('/match/:round?', common.require_login, function(req, res) {
   var tasks = []
     , data = {}
     , round = +(req.params.round || config.round);
