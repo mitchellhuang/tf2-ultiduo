@@ -11,22 +11,17 @@
 var express    = require('express')
   , connect    = require('connect')
   , sqlite     = require('sqlite3')
-  , steam_data = require('steam')
-  , steam      = require('./steam')
   , async      = require('async')
   , sanitizer  = require('sanitizer')
   , invite     = require('./invite_players')
   , _          = require('underscore')
-  , common     = require('common');
+  , common     = require('./common');
 
 var app = module.exports = express.createServer();
 
 // Load config settings for the mode we're running in
 // (should be 'development' or 'production')
 var config = require('./config.' + app.settings.env + '.js');
-
-var steam_api = new steam_data({ apiKey: config.steam_api_key,
-                                 format: 'json' });
 
 // Load the sqlite database and setup the our tables, if they don't already
 // exist
@@ -480,61 +475,6 @@ ON t.medic_id = p2.id                          \
 
     res.render('teams', { teams: rows });
   });
-});
-
-// Login via Steam
-app.get('/verify', steam.verify, function(req, res) {
-  console.log('User logged in: ' + req.steamid);
-  req.session.steamid = req.steamid;
-
-  steam_api.getPlayerSummaries({
-    steamids: [req.session.steamid],
-    callback: function(err, data) {
-      if (!err && data && data.response && data.response.players[0]) {
-        req.session.player = data.response.players[0].personaname;
-
-        db.serialize(function() {
-          db.run("INSERT OR IGNORE INTO PLAYERS ('name','steamid') \
-                                        VALUES (?1,?2)",
-                 req.session.player, req.session.steamid+"");
-
-          db.run("UPDATE PLAYERS SET name = ?1 WHERE steamid = ?2",
-                 req.session.player, req.session.steamid+"");
-        });
-
-        db.get("SELECT id,class_id, team_id FROM players WHERE steamid = $sid",
-               { $sid: req.session.steamid+""},
-               function(err, row) {
-          if (err) {
-            console.log('DB Err: ' + err);
-            req.session.player_id = 0;
-            req.session.class_id = 0;
-            req.session.team_id = false;
-          } else {
-            if (typeof row === "undefined") {
-              req.session.player_id = 0;
-              req.session.class_id = 0;
-              req.session.team_id = false;
-            } else {
-              req.session.player_id = row.id;
-              req.session.class_id = row.class_id;
-              req.session.team_id = row.team_id;
-            }
-          }
-          res.redirect(req.query['returnto'] || '/');
-        });
-
-      } else {
-        console.log("Login err: " + err);
-        res.redirect('/');
-      }
-    }
-  });
-});
-
-app.get('/logout', function(req, res) {
-  req.session.destroy();
-  res.redirect('/');
 });
 
 if (process.platform.indexOf("win") === -1) {
