@@ -1,9 +1,6 @@
 var steam_data   = require('steam')
   , steam        = require('../steam');
 
-var steam_api = new steam_data({ apiKey: config.steam_api_key,
-                                 format: 'json' });
-
 var MAYBE_INSERT_PLAYER = "\
 INSERT OR IGNORE INTO PLAYERS ('name','steamid') VALUES (?1,?2)";
 
@@ -13,6 +10,9 @@ var GET_PLAYER = "\
 SELECT id,class_id, team_id FROM players WHERE steamid = $sid";
 
 module.exports = function(app, config, db) {
+
+  var steam_api = new steam_data({ apiKey: config.steam_api_key,
+                                   format: 'json' });
 
   // Login via Steam
   app.get('/verify', steam.verify, function(req, res) {
