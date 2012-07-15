@@ -3,5 +3,10 @@ module.exports = {
   steam_api_key: '2C90B16410B5B8BE3DB9A7FD67A76A89',
   db_file: 'db.db3',
   max_players_per_class: 64,
-  round: 1
+  round: 1,
+
+  admins: [
+    '76561197993836391',
+    '76561198010796027'
+  ]
 };
