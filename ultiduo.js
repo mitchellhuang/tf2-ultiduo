@@ -125,16 +125,28 @@ require('./routes/')(app, config, db);
 // Routes
 
 app.get('/bracket', function(req, res) {
-  db.all('SELECT          \
-m.id,                     \
-t1.name as team1_name,    \
-t2.name as team2_name,    \
-team1_score,              \
-team2_score               \
-FROM MATCHES m            \
-JOIN TEAMS t1 ON t1.id = m.team1_id  \
-JOIN TEAMS t2 ON t2.id = m.team2_id  \
-WHERE m.round = ?                    \
+  db.all('SELECT                                  \
+m.id,                                             \
+t1.name as team1_name,                            \
+t2.name as team2_name,                            \
+p1.name as team1_soldier_name,                    \
+p2.name as team1_medic_name,                      \
+p3.name as team2_soldier_name,                    \
+p4.name as team2_medic_name,                      \
+p1.steamid as team1_soldier_id,                   \
+p2.steamid as team1_medic_id,                     \
+p3.steamid as team2_soldier_id,                   \
+p4.steamid as team2_medic_id,                     \
+team1_score,                                      \
+team2_score                                       \
+FROM MATCHES m                                    \
+JOIN TEAMS t1 ON t1.id = m.team1_id               \
+JOIN TEAMS t2 ON t2.id = m.team2_id               \
+JOIN PLAYERS p1 ON p1.id = t1.soldier_id          \
+JOIN PLAYERS p2 ON p2.id = t1.medic_id            \
+JOIN PLAYERS p3 ON p3.id = t2.soldier_id          \
+JOIN PLAYERS p4 ON p4.id = t2.medic_id            \
+WHERE m.round = ?                                 \
 ORDER BY team1_score DESC', config.round,
          function(err, rows) {
            if (err) {

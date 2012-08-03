@@ -1,17 +1,34 @@
 h2 Current Matches (Round #{config.round})
 
+a(href='#', id='toggle_players') Show Players
+
 table.matches
   tr
-    th Match #
+    th Match
     th Team 1
     th Team 2
-    th Reported Score
+    th Score
 
   each match in matches
     tr
       td!= match.id
-      td!= match.team1_name
+      td
+        != match.team1_name
+        ul
+          li
+            a(href='http://steamcommunity.com/profiles/'+match.team1_soldier_id)
+              != match.team1_soldier_name
+          li
+            a(href='http://steamcommunity.com/profiles/'+match.team1_medic_id)
+              != match.team1_medic_name
       td!= match.team2_name
+        ul
+          li
+            a(href='http://steamcommunity.com/profiles/'+match.team2_soldier_id)
+              != match.team2_soldier_name
+          li
+            a(href='http://steamcommunity.com/profiles/'+match.team2_medic_id)
+              != match.team2_medic_name
       - if (match.team1_score !== null)
         td #{match.team1_score}-#{match.team2_score}
       - else
@@ -21,3 +38,6 @@ h2 Overall Bracket
 
 a(href="http://images.challonge.com/rugcultiduo.png")
   img(src="http://images.challonge.com/rugcultiduo.png", width="700")
+
+script(src='https://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js')
+script(src='/javascripts/bracket_toggle_players.js')
